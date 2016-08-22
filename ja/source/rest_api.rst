@@ -39,7 +39,7 @@ REST API付きスイッチングハブの実装
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_rest_13.py
+.. literalinclude:: ../../sources/simple_switch_rest_13.py
 
 simple_switch_rest_13.pyでは、二つのクラスを定義しています。
 

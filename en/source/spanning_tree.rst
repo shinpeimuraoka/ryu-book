@@ -169,7 +169,7 @@ Source name: ``simple_switch_stp_13.py``
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_stp_13.py
+.. literalinclude:: ../../sources/simple_switch_stp_13.py
 
 
 .. NOTE::
@@ -222,7 +222,7 @@ Source name: ``spanning_tree.py``
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/spanning_tree.py
+.. literalinclude:: ../../sources/spanning_tree.py
 
 
 By executing the program in the VM environment, a topology is created in which a loop exists between switches s1, s2, and s3.

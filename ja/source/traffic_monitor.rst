@@ -36,7 +36,7 @@
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_monitor.py
+.. literalinclude:: ../../sources/simple_monitor.py
 
 SimpleSwitch13を継承したSimpleMonitorクラスに、トラフィックモニター機能を
 実装していますので、ここにはパケット転送に関する処理は出てきません。

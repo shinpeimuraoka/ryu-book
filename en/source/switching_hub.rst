@@ -149,7 +149,7 @@ The source code is short thus we shown the entire source code below.
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_13.py
+.. literalinclude:: ../../sources/simple_switch_13.py
 
 
 Let's examine the respective implementation content.
