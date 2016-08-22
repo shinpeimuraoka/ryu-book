@@ -35,7 +35,7 @@ Let's take a look at the source code.
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_rest_13.py
+.. literalinclude:: ../../sources/simple_switch_rest_13.py
 
 With simple_switch_rest_13.py, two classes are defined.
 

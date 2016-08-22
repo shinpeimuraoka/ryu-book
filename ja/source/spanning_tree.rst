@@ -199,7 +199,7 @@ simple_switch_stp_13.pyを作成することとします。このプログラム
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_stp_13.py
+.. literalinclude:: ../../sources/simple_switch_stp_13.py
 
 
 .. NOTE::
@@ -255,7 +255,7 @@ VMイメージ利用のための環境設定やログイン方法等は「 :ref:
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/spanning_tree.py
+.. literalinclude:: ../../sources/spanning_tree.py
 
 
 VM環境でこのプログラムを実行することにより、スイッチs1、s2、s3の間でループが

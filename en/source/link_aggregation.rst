@@ -47,7 +47,7 @@ Source name: ``simple_switch_lacp_13.py``
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_lacp_13.py
+.. literalinclude:: ../../sources/simple_switch_lacp_13.py
 
 
 Configuring an Experimental Environment
@@ -82,7 +82,7 @@ Source name: ``link_aggregation.py``
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/link_aggregation.py
+.. literalinclude:: ../../sources/link_aggregation.py
 
 By executing this script, a topology is created in which two links exist between host h1 and switch s1. It is possible to use the net command to check the created topology.
 

@@ -68,7 +68,7 @@ simple_switch_lacp_13.pyを作成することとします。このプログラ�
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_lacp_13.py
+.. literalinclude:: ../../sources/simple_switch_lacp_13.py
 
 
 実験環境の構築
@@ -105,7 +105,7 @@ MininetのAPIを呼び出すスクリプトを作成し、必要なトポロジ�
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/link_aggregation.py
+.. literalinclude:: ../../sources/link_aggregation.py
 
 このスクリプトを実行することにより、ホストh1とスイッチs1の間に2本のリンクが
 存在するトポロジが作成されます。netコマンドで作成されたトポロジを確認す

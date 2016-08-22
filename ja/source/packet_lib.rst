@@ -167,7 +167,7 @@ IPアドレス等は__init__メソッド内にハードコードされていま�
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/ping_responder.py
+.. literalinclude:: ../../sources/ping_responder.py
 
 
 .. NOTE::

@@ -129,7 +129,7 @@ simple_switch_igmp_13.pyを作成することとします。このプログラ�
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_switch_igmp_13.py
+.. literalinclude:: ../../sources/simple_switch_igmp_13.py
 
 .. NOTE:: 以降の例では、マルチキャストパケットの送受信にVLC
           (http://www.videolan.org/vlc/)を使用します。VLCのインストール、

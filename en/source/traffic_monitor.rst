@@ -24,7 +24,7 @@ The following is source code in which a traffic monitoring function has been add
 
 .. rst-class:: sourcecode
 
-.. literalinclude:: sources/simple_monitor.py
+.. literalinclude:: ../../sources/simple_monitor.py
 
 The traffic monitor function has been implemented in the SimpleMonitor class which inherited SimpleSwitch13, therefore, there is no packet transfer-related processing here.
 
