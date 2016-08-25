@@ -174,6 +174,7 @@ In the OpenFlow protocol, some procedures such as handshake required for communi
 
         def __init__(self, *args, **kwargs):
             super(SimpleSwitch13, self).__init__(*args, **kwargs)
+            # initialize mac address table.
             self.mac_to_port = {}
 
         # ...
@@ -283,12 +284,6 @@ The switching hub does not particularly use the received Switch Features message
         # ...
 
         # install table-miss flow entry
-        #
-        # We specify NO BUFFER to max_len of the output action due to
-        # OVS bug. At this moment, if we specify a lesser number, e.g.,
-        # 128, OVS will send Packet-In with invalid buffer_id and
-        # truncated packet data. In that case, we cannot output packets
-        # correctly.
         match = parser.OFPMatch()
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
@@ -356,16 +351,14 @@ Updating the MAC Address Table
     def _packet_in_handler(self, ev):
         # ...
 
-        in_port = msg.match['in_port']
-
+        # analyse the received packets using the packet library.
         pkt = packet.Packet(msg.data)
-        eth = pkt.get_protocols(ethernet.ethernet)[0]
+        eth_pkt = pkt.get_protocol(ethernet.ethernet)
+        dst = eth_pkt.dst
+        src = eth_pkt.src
 
-        dst = eth.dst
-        src = eth.src
-
-        dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
+        # get the received port number from packet_in message.
+        in_port = msg.match['in_port']
 
         self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
 
@@ -399,9 +392,10 @@ The corresponding port number is used when the destination MAC address exists in
         else:
             out_port = ofproto.OFPP_FLOOD
 
+        # construct action list.
         actions = [parser.OFPActionOutput(out_port)]
 
-        # install a flow to avoid packet_in next time
+        # install a flow to avoid packet_in next time.
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             self.add_flow(datapath, 1, match, actions)
@@ -440,6 +434,7 @@ Processing of the Packet-In handler has not been done yet but here take a look a
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
+        # construct flow_mod message and send it.
         inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
                                              actions)]
 
@@ -572,12 +567,10 @@ Regardless whether the destination MAC address is found from the MAC address tab
     def _packet_in_handler(self, ev):
         # ...
 
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
-                                  in_port=in_port, actions=actions, data=data)
+        out = parser.OFPPacketOut(datapath=datapath,
+                                  buffer_id=ofproto.OFP_NO_BUFFER,
+                                  in_port=in_port, actions=actions,
+                                  data=msg.data)
         datapath.send_msg(out)
 
 The class corresponding to the Packet-Out message is ``OFPPacketOut`` class.
