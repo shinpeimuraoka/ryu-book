@@ -24,6 +24,7 @@ OpenFlowバージョン 定数モジュール           パーサーモジュー
 1.2.x              ryu.ofproto.ofproto_v1_2 ryu.ofproto.ofproto_v1_2_parser
 1.3.x              ryu.ofproto.ofproto_v1_3 ryu.ofproto.ofproto_v1_3_parser
 1.4.x              ryu.ofproto.ofproto_v1_4 ryu.ofproto.ofproto_v1_4_parser
+1.5.x              ryu.ofproto.ofproto_v1_5 ryu.ofproto.ofproto_v1_5_parser
 ================== ======================== ===============================
 
 定数モジュール
