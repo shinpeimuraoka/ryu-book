@@ -247,6 +247,10 @@ ofproto        Indicates the ofproto module that supports the OpenFlow version
 
                ``ryu.ofproto.ofproto_v1_3``
 
+               ``ryu.ofproto.ofproto_v1_4``
+
+               ``ryu.ofproto.ofproto_v1_5``
+
 ofproto_parser Same as ofproto, indicates the ofproto_parser module.
                At this point, it is one of the following modules.
 
@@ -255,6 +259,10 @@ ofproto_parser Same as ofproto, indicates the ofproto_parser module.
                ``ryu.ofproto.ofproto_v1_2_parser``
 
                ``ryu.ofproto.ofproto_v1_3_parser``
+
+               ``ryu.ofproto.ofproto_v1_4_parser``
+
+               ``ryu.ofproto.ofproto_v1_5_parser``
 ============== ==============================================================
 
 The main methods of the Datapath class used in the Ryu application are as follows:
