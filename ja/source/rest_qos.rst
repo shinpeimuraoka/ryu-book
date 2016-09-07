@@ -1094,9 +1094,7 @@ DSドメインの境界に位置するルータ(エッジルータ)によって�
 
 ソース名： ``qos_sample_topology.py``
 
-.. rst-class:: sourcecode
-
-.. literalinclude:: sources/qos_sample_topology.py
+.. literalinclude:: ../../sources/qos_sample_topology.py
 
 .. NOTE::
 

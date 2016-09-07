@@ -167,10 +167,8 @@ ARP REQUESTとICMP ECHO REQUESTをPacket-Inで受けとり、
 返事をPacket-Outで送信します。
 IPアドレス等は__init__メソッド内にハードコードされています。
 
-.. rst-class:: sourcecode
-
-.. literalinclude:: sources/ping_responder.py
-
+.. literalinclude:: ../../sources/ping_responder.py
+    :lines: 19-
 
 .. NOTE::
     OpenFlow 1.2以降では、Packet-Inメッセージのmatchフィールドから、
