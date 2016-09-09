@@ -60,7 +60,7 @@
 <div class="section" id="id2">
 <h3>環境構築<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>まずはMininet上に環境を構築します。入力するコマンドは「<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>スイッチングハブ</span></a>」と同様です。</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --topo single,3 --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --topo single,3 --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -88,12 +88,12 @@ mininet&gt;
 </div>
 <p>続いて、使用するOpenFlowのバージョンを1.3に設定します。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
 </pre></div>
 </div>
 <p>最後に、コントローラのxterm上でrest_firewallを起動させます。</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ryu-manager ryu.app.rest_firewall
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_firewall
 loading app ryu.app.rest_firewall
 loading app ryu.controller.ofp_handler
 instantiating app None of DPSet
@@ -118,7 +118,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 <p class="last">以降の説明で使用するREST APIの詳細は、章末の「<a class="reference internal" href="#rest-api">REST API一覧</a>」を参照してください。</p>
 </div>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -129,7 +129,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
     }
   ]
 
-root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
+# curl http://localhost:8080/firewall/module/status
   [
     {
       &quot;status&quot;: &quot;enable&quot;,
@@ -144,7 +144,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
 </div>
 <p>h1からh2へのpingの疎通を確認してみます。しかし、アクセス許可のルールを設定していないため遮断されてしまいます。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.2
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.2
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 ^C
 --- 10.0.0.2 ping statistics ---
@@ -194,7 +194,7 @@ PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.1/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.1/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -207,7 +207,7 @@ PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.1/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.1/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -223,7 +223,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;
 </div>
 <p>追加したルールがフローエントリとしてスイッチに登録されます。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-ofctl -O openflow13 dump-flows s1
+<div class="console highlight-python"><div class="highlight"><pre># ovs-ofctl -O openflow13 dump-flows s1
 OFPST_FLOW reply (OF1.3) (xid=0x2):
  cookie=0x0, duration=823.705s, table=0, n_packets=10, n_bytes=420, priority=65534,arp actions=NORMAL
  cookie=0x0, duration=542.472s, table=0, n_packets=20, n_bytes=1960, priority=0 actions=CONTROLLER:128
@@ -264,7 +264,7 @@ OFPST_FLOW reply (OF1.3) (xid=0x2):
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.3/32&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.3/32&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -277,7 +277,7 @@ OFPST_FLOW reply (OF1.3) (xid=0x2):
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -340,7 +340,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d  &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;, &quot;actions&quot;: &quot;DENY&quot;, &quot;priority&quot;: &quot;10&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d  &#39;{&quot;nw_src&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;, &quot;actions&quot;: &quot;DENY&quot;, &quot;priority&quot;: &quot;10&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -353,7 +353,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d  &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;, &quot;actions&quot;: &quot;DENY&quot;, &quot;priority&quot;: &quot;10&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d  &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot;, &quot;nw_dst&quot;: &quot;10.0.0.2/32&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;, &quot;actions&quot;: &quot;DENY&quot;, &quot;priority&quot;: &quot;10&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -369,7 +369,7 @@ root@ryu-vm:~# curl -X POST -d  &#39;{&quot;nw_src&quot;: &quot;10.0.0.3/32&quot
 </div>
 <p>追加したルールがフローエントリとしてスイッチに登録されます。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-ofctl -O openflow13 dump-flows s1
+<div class="console highlight-python"><div class="highlight"><pre># ovs-ofctl -O openflow13 dump-flows s1
 OFPST_FLOW reply (OF1.3) (xid=0x2):
  cookie=0x3, duration=242.155s, table=0, n_packets=0, n_bytes=0, priority=1,ip,nw_src=10.0.0.2,nw_dst=10.0.0.3 actions=NORMAL
  cookie=0x4, duration=233.099s, table=0, n_packets=0, n_bytes=0, priority=1,ip,nw_src=10.0.0.3,nw_dst=10.0.0.2 actions=NORMAL
@@ -386,7 +386,7 @@ OFPST_FLOW reply (OF1.3) (xid=0x2):
 <h3>ルール確認<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>設定されているルールを確認します。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;access_control_list&quot;: [
@@ -456,7 +456,7 @@ OFPST_FLOW reply (OF1.3) (xid=0x2):
 <a class="reference internal image-reference" href="_images/fig22.png"><img alt="_images/fig22.png" class="align-center" src="_images/fig22.png" style="width: 400.0px; height: 294.0px;" /></a>
 <p>h1からh2にpingを実行してみます。許可するルールが設定されているので、pingが疎通します。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.2
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.2
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 64 bytes from 10.0.0.2: icmp_req=1 ttl=64 time=0.419 ms
 64 bytes from 10.0.0.2: icmp_req=2 ttl=64 time=0.047 ms
@@ -467,7 +467,7 @@ PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 </div>
 <p>h1からh2へのping以外のパケットはfirewallによって遮断されます。例えばh1からh2にwgetを実行すると、パケットが遮断された旨ログが出力されます。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# wget http://10.0.0.2
+<div class="console highlight-python"><div class="highlight"><pre># wget http://10.0.0.2
 --2013-12-16 15:00:38--  http://10.0.0.2/
 Connecting to 10.0.0.2:80... ^C
 </pre></div>
@@ -479,13 +479,13 @@ Connecting to 10.0.0.2:80... ^C
 </div>
 <p>h2とh3の間はping以外のパケットの疎通が可能となっています。例えばh2からh3にsshを実行すると、パケットが遮断された旨のログは出力されません(h3でsshdが動作していないため、sshでの接続には失敗します)。</p>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ssh 10.0.0.3
+<div class="console highlight-python"><div class="highlight"><pre># ssh 10.0.0.3
 ssh: connect to host 10.0.0.3 port 22: Connection refused
 </pre></div>
 </div>
 <p>h2からh3にpingを実行すると、パケットがfirewallによって遮断された旨ログが出力されます。</p>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.3
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.3
 PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
 ^C
 --- 10.0.0.3 ping statistics ---
@@ -502,7 +502,7 @@ PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
 <h3>ルール削除<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>&#8220;rule_id:5&#8221;および&#8221;rule_id:6&#8221;のルールを削除します。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X DELETE -d &#39;{&quot;rule_id&quot;: &quot;5&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X DELETE -d &#39;{&quot;rule_id&quot;: &quot;5&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -515,7 +515,7 @@ PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
     }
   ]
 
-root@ryu-vm:~# curl -X DELETE -d &#39;{&quot;rule_id&quot;: &quot;6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X DELETE -d &#39;{&quot;rule_id&quot;: &quot;6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -533,7 +533,7 @@ root@ryu-vm:~# curl -X DELETE -d &#39;{&quot;rule_id&quot;: &quot;6&quot;}&#39; 
 <a class="reference internal image-reference" href="_images/fig32.png"><img alt="_images/fig32.png" class="align-center" src="_images/fig32.png" style="width: 400.0px; height: 294.4px;" /></a>
 <p>実際に確認します。h2とh3の間のping(ICMP)を遮断するルールが削除されたため、pingが疎通できるようになったことがわかります。</p>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.3
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.3
 PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
 64 bytes from 10.0.0.3: icmp_req=1 ttl=64 time=0.841 ms
 64 bytes from 10.0.0.3: icmp_req=2 ttl=64 time=0.036 ms
@@ -551,7 +551,7 @@ PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
 <div class="section" id="id8">
 <h3>環境構築<a class="headerlink" href="#id8" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>シングルテナントでの例と同様、Mininet上に環境を構築し、コントローラ用のxtermをもうひとつ起動しておきます。使用するホストがひとつ増えていることにご注意ください。</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --topo single,4 --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --topo single,4 --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -575,41 +575,41 @@ mininet&gt;
 </div>
 <p>続いて、各ホストのインターフェースにVLAN IDを設定します。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.1/8 dev h1-eth0
-root@ryu-vm:~# ip link add link h1-eth0 name h1-eth0.2 type vlan id 2
-root@ryu-vm:~# ip addr add 10.0.0.1/8 dev h1-eth0.2
-root@ryu-vm:~# ip link set dev h1-eth0.2 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.1/8 dev h1-eth0</span>
+<span class="c1"># ip link add link h1-eth0 name h1-eth0.2 type vlan id 2</span>
+<span class="c1"># ip addr add 10.0.0.1/8 dev h1-eth0.2</span>
+<span class="c1"># ip link set dev h1-eth0.2 up</span>
 </pre></div>
 </div>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.2/8 dev h2-eth0
-root@ryu-vm:~# ip link add link h2-eth0 name h2-eth0.2 type vlan id 2
-root@ryu-vm:~# ip addr add 10.0.0.2/8 dev h2-eth0.2
-root@ryu-vm:~# ip link set dev h2-eth0.2 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.2/8 dev h2-eth0</span>
+<span class="c1"># ip link add link h2-eth0 name h2-eth0.2 type vlan id 2</span>
+<span class="c1"># ip addr add 10.0.0.2/8 dev h2-eth0.2</span>
+<span class="c1"># ip link set dev h2-eth0.2 up</span>
 </pre></div>
 </div>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.3/8 dev h3-eth0
-root@ryu-vm:~# ip link add link h3-eth0 name h3-eth0.110 type vlan id 110
-root@ryu-vm:~# ip addr add 10.0.0.3/8 dev h3-eth0.110
-root@ryu-vm:~# ip link set dev h3-eth0.110 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.3/8 dev h3-eth0</span>
+<span class="c1"># ip link add link h3-eth0 name h3-eth0.110 type vlan id 110</span>
+<span class="c1"># ip addr add 10.0.0.3/8 dev h3-eth0.110</span>
+<span class="c1"># ip link set dev h3-eth0.110 up</span>
 </pre></div>
 </div>
 <p>host: h4:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.4/8 dev h4-eth0
-root@ryu-vm:~# ip link add link h4-eth0 name h4-eth0.110 type vlan id 110
-root@ryu-vm:~# ip addr add 10.0.0.4/8 dev h4-eth0.110
-root@ryu-vm:~# ip link set dev h4-eth0.110 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.4/8 dev h4-eth0</span>
+<span class="c1"># ip link add link h4-eth0 name h4-eth0.110 type vlan id 110</span>
+<span class="c1"># ip addr add 10.0.0.4/8 dev h4-eth0.110</span>
+<span class="c1"># ip link set dev h4-eth0.110 up</span>
 </pre></div>
 </div>
 <p>さらに、使用するOpenFlowのバージョンを1.3に設定します。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
 </pre></div>
 </div>
 <p>最後に、コントローラのxterm上でrest_firewallを起動させます。</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ryu-manager ryu.app.rest_firewall
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_firewall
 loading app ryu.app.rest_firewall
 loading app ryu.controller.ofp_handler
 instantiating app None of DPSet
@@ -630,7 +630,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 <h3>初期状態の変更<a class="headerlink" href="#id9" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>firewallを有効(enable)にします。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -641,7 +641,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
     }
   ]
 
-root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
+# curl http://localhost:8080/firewall/module/status
   [
     {
       &quot;status&quot;: &quot;enable&quot;,
@@ -694,7 +694,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.0/8&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;nw_src&quot;: &quot;10.0.0.0/8&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -708,7 +708,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_dst&quot;: &quot;10.0.0.0/8&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
+# curl -X POST -d &#39;{&quot;nw_dst&quot;: &quot;10.0.0.0/8&quot;, &quot;nw_proto&quot;: &quot;ICMP&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -728,7 +728,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_dst&quot;: &quot;10.0.0.0/8&quot;,
 <h3>ルール確認<a class="headerlink" href="#id11" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>設定されているルールを確認します。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl http://localhost:8080/firewall/rules/0000000000000001/all
+<div class="console highlight-python"><div class="highlight"><pre># curl http://localhost:8080/firewall/rules/0000000000000001/all
   [
     {
       &quot;access_control_list&quot;: [
@@ -763,7 +763,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;nw_dst&quot;: &quot;10.0.0.0/8&quot;,
 </div>
 <p>実際に確認してみます。vlan_id=2であるh1から、同じくvlan_id=2であるh2に対し、pingを実行すると、追加したルールのとおり疎通できることがわかります。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.2
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.2
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 64 bytes from 10.0.0.2: icmp_req=1 ttl=64 time=0.893 ms
 64 bytes from 10.0.0.2: icmp_req=2 ttl=64 time=0.098 ms
@@ -774,7 +774,7 @@ PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 </div>
 <p>vlan_id=110同士であるh3とh4の間は、ルールが登録されていないため、pingパケットは遮断されます。</p>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping 10.0.0.4
+<div class="console highlight-python"><div class="highlight"><pre># ping 10.0.0.4
 PING 10.0.0.4 (10.0.0.4) 56(84) bytes of data.
 ^C
 --- 10.0.0.4 ping statistics ---
@@ -796,7 +796,7 @@ PING 10.0.0.4 (10.0.0.4) 56(84) bytes of data.
 <div class="section" id="id12">
 <h3>環境構築<a class="headerlink" href="#id12" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>まずは「<a class="reference internal" href="#ipv4">シングルテナントでの動作例(IPv4)</a>」と同様に、Mininet上に環境を構築します。</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --topo single,3 --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --topo single,3 --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -823,12 +823,12 @@ mininet&gt;
 </div>
 <p>続いて、使用するOpenFlowのバージョンを1.3に設定します。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
 </pre></div>
 </div>
 <p>最後に、コントローラのxterm上でrest_firewallを起動させます。</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ryu-manager ryu.app.rest_firewall
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_firewall
 loading app ryu.app.rest_firewall
 loading app ryu.controller.ofp_handler
 instantiating app None of DPSet
@@ -849,7 +849,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 <h3>初期状態の変更<a class="headerlink" href="#id13" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>firewallを有効(enable)にします。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -860,7 +860,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
     }
   ]
 
-root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
+# curl http://localhost:8080/firewall/module/status
   [
     {
       &quot;status&quot;: &quot;enable&quot;,
@@ -924,7 +924,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;ipv6_dst&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;ipv6_dst&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -937,7 +937,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;ipv6_dst&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;ipv6_dst&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -950,7 +950,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;ipv6_dst&quot;: &quot;ff02::1:ff00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;ipv6_dst&quot;: &quot;ff02::1:ff00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -963,7 +963,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;ipv6_dst&quot;: &quot;ff02::1:ff00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;ipv6_dst&quot;: &quot;ff02::1:ff00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -982,7 +982,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
 <h3>ルール確認<a class="headerlink" href="#id15" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>設定されているルールを確認します。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl http://localhost:8080/firewall/rules/0000000000000001/all
+<div class="console highlight-python"><div class="highlight"><pre># curl http://localhost:8080/firewall/rules/0000000000000001/all
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1034,7 +1034,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
 </div>
 <p>h1からh2にpingを実行してみます。許可するルールが設定されているので、pingが疎通します。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping6 -I h1-eth0 fe80::200:ff:fe00:2
+<div class="console highlight-python"><div class="highlight"><pre># ping6 -I h1-eth0 fe80::200:ff:fe00:2
 PING fe80::200:ff:fe00:2(fe80::200:ff:fe00:2) from fe80::200:ff:fe00:1 h1-eth0: 56 data bytes
 64 bytes from fe80::200:ff:fe00:2: icmp_seq=1 ttl=64 time=0.954 ms
 64 bytes from fe80::200:ff:fe00:2: icmp_seq=2 ttl=64 time=0.047 ms
@@ -1045,7 +1045,7 @@ PING fe80::200:ff:fe00:2(fe80::200:ff:fe00:2) from fe80::200:ff:fe00:1 h1-eth0: 
 </div>
 <p>h1とh3の間は、ルールが登録されていないため、pingパケットは遮断されます。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping6 -I h1-eth0 fe80::200:ff:fe00:3
+<div class="console highlight-python"><div class="highlight"><pre># ping6 -I h1-eth0 fe80::200:ff:fe00:3
 PING fe80::200:ff:fe00:3(fe80::200:ff:fe00:3) from fe80::200:ff:fe00:1 h1-eth0: 56 data bytes
 From fe80::200:ff:fe00:1 icmp_seq=1 Destination unreachable: Address unreachable
 From fe80::200:ff:fe00:1 icmp_seq=2 Destination unreachable: Address unreachable
@@ -1070,7 +1070,7 @@ From fe80::200:ff:fe00:1 icmp_seq=3 Destination unreachable: Address unreachable
 <div class="section" id="id17">
 <h3>環境構築<a class="headerlink" href="#id17" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>まずは「<a class="reference internal" href="#id7">マルチテナントでの動作例(IPv4)</a>」と同様に、Mininet上に環境を構築します。</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --topo single,4 --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --topo single,4 --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -1093,41 +1093,41 @@ mininet&gt;
 </div>
 <p>続いて、各ホストのインターフェースにVLAN IDを設定します。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del fe80::200:ff:fe00:1/64 dev h1-eth0
-root@ryu-vm:~# ip link add link h1-eth0 name h1-eth0.2 type vlan id 2
-root@ryu-vm:~# ip addr add fe80::200:ff:fe00:1/64 dev h1-eth0.2
-root@ryu-vm:~# ip link set dev h1-eth0.2 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del fe80::200:ff:fe00:1/64 dev h1-eth0</span>
+<span class="c1"># ip link add link h1-eth0 name h1-eth0.2 type vlan id 2</span>
+<span class="c1"># ip addr add fe80::200:ff:fe00:1/64 dev h1-eth0.2</span>
+<span class="c1"># ip link set dev h1-eth0.2 up</span>
 </pre></div>
 </div>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del fe80::200:ff:fe00:2/64 dev h2-eth0
-root@ryu-vm:~# ip link add link h2-eth0 name h2-eth0.2 type vlan id 2
-root@ryu-vm:~# ip addr add fe80::200:ff:fe00:2/64 dev h2-eth0.2
-root@ryu-vm:~# ip link set dev h2-eth0.2 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del fe80::200:ff:fe00:2/64 dev h2-eth0</span>
+<span class="c1"># ip link add link h2-eth0 name h2-eth0.2 type vlan id 2</span>
+<span class="c1"># ip addr add fe80::200:ff:fe00:2/64 dev h2-eth0.2</span>
+<span class="c1"># ip link set dev h2-eth0.2 up</span>
 </pre></div>
 </div>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del fe80::200:ff:fe00:3/64 dev h3-eth0
-root@ryu-vm:~# ip link add link h3-eth0 name h3-eth0.110 type vlan id 110
-root@ryu-vm:~# ip addr add fe80::200:ff:fe00:3/64 dev h3-eth0.110
-root@ryu-vm:~# ip link set dev h3-eth0.110 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del fe80::200:ff:fe00:3/64 dev h3-eth0</span>
+<span class="c1"># ip link add link h3-eth0 name h3-eth0.110 type vlan id 110</span>
+<span class="c1"># ip addr add fe80::200:ff:fe00:3/64 dev h3-eth0.110</span>
+<span class="c1"># ip link set dev h3-eth0.110 up</span>
 </pre></div>
 </div>
 <p>host: h4:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del fe80::200:ff:fe00:4/64 dev h4-eth0
-root@ryu-vm:~# ip link add link h4-eth0 name h4-eth0.110 type vlan id 110
-root@ryu-vm:~# ip addr add fe80::200:ff:fe00:4/64 dev h4-eth0.110
-root@ryu-vm:~# ip link set dev h4-eth0.110 up
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del fe80::200:ff:fe00:4/64 dev h4-eth0</span>
+<span class="c1"># ip link add link h4-eth0 name h4-eth0.110 type vlan id 110</span>
+<span class="c1"># ip addr add fe80::200:ff:fe00:4/64 dev h4-eth0.110</span>
+<span class="c1"># ip link set dev h4-eth0.110 up</span>
 </pre></div>
 </div>
 <p>さらに、使用するOpenFlowのバージョンを1.3に設定します。</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
 </pre></div>
 </div>
 <p>最後に、コントローラのxterm上でrest_firewallを起動させます。</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ryu-manager ryu.app.rest_firewall
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_firewall
 loading app ryu.app.rest_firewall
 loading app ryu.controller.ofp_handler
 instantiating app None of DPSet
@@ -1148,7 +1148,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 <h3>初期状態の変更<a class="headerlink" href="#id18" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>firewallを有効(enable)にします。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X PUT http://localhost:8080/firewall/module/enable/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1159,7 +1159,7 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
     }
   ]
 
-root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
+# curl http://localhost:8080/firewall/module/status
   [
     {
       &quot;status&quot;: &quot;enable&quot;,
@@ -1212,7 +1212,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:1&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
   [
     {
       &quot;command_result&quot;: [
@@ -1226,7 +1226,7 @@ root@ryu-vm:~# curl http://localhost:8080/firewall/module/status
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
+# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe00:2&quot;, &quot;nw_proto&quot;: &quot;ICMPv6&quot;}&#39; http://localhost:8080/firewall/rules/0000000000000001/2
   [
     {
       &quot;command_result&quot;: [
@@ -1246,7 +1246,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
 <h3>ルール確認<a class="headerlink" href="#id20" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>設定されているルールを確認します。</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl http://localhost:8080/firewall/rules/0000000000000001/all
+<div class="console highlight-python"><div class="highlight"><pre># curl http://localhost:8080/firewall/rules/0000000000000001/all
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1281,7 +1281,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;ipv6_src&quot;: &quot;fe80::200:ff:fe
 </div>
 <p>実際に確認してみます。vlan_id=2であるh1から、同じくvlan_id=2であるh2に対し、pingを実行すると、追加したルールのとおり疎通できることがわかります。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping6 -I h1-eth0.2 fe80::200:ff:fe00:2
+<div class="console highlight-python"><div class="highlight"><pre># ping6 -I h1-eth0.2 fe80::200:ff:fe00:2
 PING fe80::200:ff:fe00:2(fe80::200:ff:fe00:2) from fe80::200:ff:fe00:1 h1-eth0.2: 56 data bytes
 64 bytes from fe80::200:ff:fe00:2: icmp_seq=1 ttl=64 time=0.609 ms
 64 bytes from fe80::200:ff:fe00:2: icmp_seq=2 ttl=64 time=0.046 ms
@@ -1292,7 +1292,7 @@ PING fe80::200:ff:fe00:2(fe80::200:ff:fe00:2) from fe80::200:ff:fe00:1 h1-eth0.2
 </div>
 <p>vlan_id=110同士であるh3とh4の間は、ルールが登録されていないため、pingパケットは遮断されます。</p>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping6 -I h3-eth0.110 fe80::200:ff:fe00:4
+<div class="console highlight-python"><div class="highlight"><pre># ping6 -I h3-eth0.110 fe80::200:ff:fe00:4
 PING fe80::200:ff:fe00:4(fe80::200:ff:fe00:4) from fe80::200:ff:fe00:3 h3-eth0.110: 56 data bytes
 From fe80::200:ff:fe00:3 icmp_seq=1 Destination unreachable: Address unreachable
 From fe80::200:ff:fe00:3 icmp_seq=2 Destination unreachable: Address unreachable

@@ -142,25 +142,10 @@ eth-src: ホストA
 <h2>Ryuによるスイッチングハブの実装<a class="headerlink" href="#ryu" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>スイッチングハブのソースコードは、Ryuのソースツリーにあります。</p>
 <blockquote>
-<div>ryu/app/simple_switch_13.py</div></blockquote>
+<div>ryu/app/example_switch_13.py</div></blockquote>
 <p>OpenFlowのバージョンに応じて、他にもsimple_switch.py(OpenFlow 1.0)、simple_switch_12.py(OpenFlow 1.2)がありますが、ここではOpenFlow 1.3に対応した実装を見ていきます。</p>
 <p>短いソースコードなので、全体をここに掲載します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="c1"># Copyright (C) 2016 Nippon Telegraph and Telephone Corporation.</span>
-<span class="c1">#</span>
-<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
-<span class="c1"># you may not use this file except in compliance with the License.</span>
-<span class="c1"># You may obtain a copy of the License at</span>
-<span class="c1">#</span>
-<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
-<span class="c1">#</span>
-<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
-<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
-<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or</span>
-<span class="c1"># implied.</span>
-<span class="c1"># See the License for the specific language governing permissions and</span>
-<span class="c1"># limitations under the License.</span>
-
-<span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
 <span class="kn">from</span> <span class="nn">ryu.controller</span> <span class="kn">import</span> <span class="n">ofp_event</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">set_ev_cls</span>
@@ -169,11 +154,11 @@ eth-src: ホストA
 <span class="kn">from</span> <span class="nn">ryu.lib.packet</span> <span class="kn">import</span> <span class="n">ethernet</span>
 
 
-<span class="k">class</span> <span class="nc">SimpleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ExampleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
     <span class="n">OFP_VERSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ofproto_v1_3</span><span class="o">.</span><span class="n">OFP_VERSION</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleSwitch13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExampleSwitch13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># initialize mac address table.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -254,15 +239,15 @@ eth-src: ホストA
 <p>Ryuアプリケーションとして実装するため、ryu.base.app_manager.RyuAppを継承します。また、OpenFlow 1.3を使用するため、<code class="docutils literal"><span class="pre">OFP_VERSIONS</span></code>にOpenFlow 1.3のバージョンを指定しています。</p>
 <p>また、MACアドレステーブル mac_to_port を定義しています。</p>
 <p>OpenFlowプロトコルでは、OpenFlowスイッチとコントローラが通信を行うために必要となるハンドシェイクなどのいくつかの手順が決められていますが、Ryuのフレームワークが処理してくれるため、Ryuアプリケーションでは意識する必要はありません。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SimpleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
     <span class="n">OFP_VERSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ofproto_v1_3</span><span class="o">.</span><span class="n">OFP_VERSION</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleSwitch13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExampleSwitch13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># initialize mac address table.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 </div>
@@ -301,13 +286,13 @@ eth-src: ホストA
 <h4>Table-missフローエントリの追加<a class="headerlink" href="#table-miss" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>OpenFlowスイッチとのハンドシェイク完了後にTable-missフローエントリをフローテーブルに追加し、Packet-Inメッセージを受信する準備を行います。</p>
 <p>具体的には、Switch Features(Features Reply)メッセージを受け取り、そこでTable-missフローエントリの追加を行います。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPSwitchFeatures</span><span class="p">,</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPSwitchFeatures</span><span class="p">,</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">datapath</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
 
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p><code class="docutils literal"><span class="pre">ev.msg</span></code>には、イベントに対応するOpenFlowメッセージクラスのインスタンスが格納されています。この場合は、<code class="docutils literal"><span class="pre">ryu.ofproto.ofproto_v1_3_parser.OFPSwitchFeatures</span></code>になります。</p>
@@ -345,10 +330,10 @@ eth-src: ホストA
 <blockquote>
 <div>OpenFlowメッセージを送信します。msgは、送信OpenFlowメッセージに対応した<code class="docutils literal"><span class="pre">ryu.ofproto.ofproto_parser.MsgBase</span></code>のサブクラスです。</div></blockquote>
 <p>スイッチングハブでは、受信したSwitch Featuresメッセージ自体は特に使いません。Table-missフローエントリを追加するタイミングを得るためのイベントとして扱っています。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-    <span class="c1"># ...</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<span class="c1"># ...</span>
 
-    <span class="c1"># install table-miss flow entry</span>
+    <span class="c1"># install the table-miss flow entry.</span>
     <span class="n">match</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPMatch</span><span class="p">()</span>
     <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">OFPActionOutput</span><span class="p">(</span><span class="n">ofproto</span><span class="o">.</span><span class="n">OFPP_CONTROLLER</span><span class="p">,</span>
                                       <span class="n">ofproto</span><span class="o">.</span><span class="n">OFPCML_NO_BUFFER</span><span class="p">)]</span>
@@ -356,10 +341,6 @@ eth-src: ホストA
 </pre></div>
 </div>
 <p>Table-missフローエントリは、優先度が最低(0)で、すべてのパケットにマッチするエントリです。このエントリのインストラクションにコントローラポートへの出力アクションを指定することで、受信パケットが、すべての通常のフローエントリにマッチしなかった場合、Packet-Inを発行するようになります。</p>
-<div class="admonition note">
-<p class="first admonition-title">注釈</p>
-<p class="last">2014年1月現在のOpen vSwitchは、OpenFlow 1.3への対応が不完全であり、OpenFlow 1.3以前と同様にデフォルトでPacket-Inが発行されます。また、Table-missフローエントリにも現時点では未対応で、通常のフローエントリとして扱われます。</p>
-</div>
 <p>すべてのパケットにマッチさせるため、空のマッチを生成します。マッチは<code class="docutils literal"><span class="pre">OFPMatch</span></code>クラスで表されます。</p>
 <p>次に、コントローラポートへ転送するためのOUTPUTアクションクラス(<code class="docutils literal"><span class="pre">OFPActionOutput</span></code>)のインスタンスを生成します。出力先にコントローラ、パケット全体をコントローラに送信するためにmax_lenには<code class="docutils literal"><span class="pre">OFPCML_NO_BUFFER</span></code>を指定しています。</p>
 <div class="admonition note">
@@ -371,14 +352,14 @@ eth-src: ホストA
 <div class="section" id="packet-in">
 <h4>Packet-inメッセージ<a class="headerlink" href="#packet-in" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>未知の宛先の受信パケットを受け付けるため、Packet-Inイベントのハンドラを作成します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">datapath</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
 
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>OFPPacketInクラスのよく使われる属性には以下のようなものがあります。</p>
@@ -410,14 +391,8 @@ eth-src: ホストA
 </div>
 <div class="section" id="mac">
 <h4>MACアドレステーブルの更新<a class="headerlink" href="#mac" title="このヘッドラインへのパーマリンク">¶</a></h4>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-    <span class="c1"># ...</span>
-
-    <span class="c1"># analyse the received packets using the packet library.</span>
-    <span class="n">pkt</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">Packet</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">eth_pkt</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get_protocol</span><span class="p">(</span><span class="n">ethernet</span><span class="o">.</span><span class="n">ethernet</span><span class="p">)</span>
-    <span class="n">dst</span> <span class="o">=</span> <span class="n">eth_pkt</span><span class="o">.</span><span class="n">dst</span>
-    <span class="n">src</span> <span class="o">=</span> <span class="n">eth_pkt</span><span class="o">.</span><span class="n">src</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<span class="c1"># ...</span>
 
     <span class="c1"># get the received port number from packet_in message.</span>
     <span class="n">in_port</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;in_port&#39;</span><span class="p">]</span>
@@ -427,7 +402,7 @@ eth-src: ホストA
     <span class="c1"># learn a mac address to avoid FLOOD next time.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span><span class="p">[</span><span class="n">dpid</span><span class="p">][</span><span class="n">src</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_port</span>
 
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>OFPPacketInクラスのmatchから、受信ポート(<code class="docutils literal"><span class="pre">in_port</span></code>)を取得します。宛先MACアドレスと送信元MACアドレスは、Ryuのパケットライブラリを使って、受信パケットのEthernetヘッダから取得しています。</p>
@@ -437,9 +412,11 @@ eth-src: ホストA
 <div class="section" id="id5">
 <h4>転送先ポートの判定<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>宛先MACアドレスが、MACアドレステーブルに存在する場合は対応するポート番号を、見つからなかった場合はフラッディング(<code class="docutils literal"><span class="pre">OFPP_FLOOD</span></code>)を出力ポートに指定したOUTPUTアクションクラスのインスタンスを生成します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-    <span class="c1"># ...</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<span class="c1"># ...</span>
 
+    <span class="c1"># if the destination mac address is already learned,</span>
+    <span class="c1"># decide which port to output the packet, otherwise FLOOD.</span>
     <span class="k">if</span> <span class="n">dst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span><span class="p">[</span><span class="n">dpid</span><span class="p">]:</span>
         <span class="n">out_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span><span class="p">[</span><span class="n">dpid</span><span class="p">][</span><span class="n">dst</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -453,7 +430,7 @@ eth-src: ホストA
         <span class="n">match</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPMatch</span><span class="p">(</span><span class="n">in_port</span><span class="o">=</span><span class="n">in_port</span><span class="p">,</span> <span class="n">eth_dst</span><span class="o">=</span><span class="n">dst</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">)</span>
 
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>宛先MACアドレスが見つかった場合は、OpenFlowスイッチのフローテーブルにエントリを追加します。</p>
@@ -471,23 +448,21 @@ eth-src: ホストA
 <div class="section" id="id6">
 <h4>フローエントリの追加処理<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>Packet-Inハンドラの処理がまだ終わっていませんが、ここで一旦フローエントリを追加するメソッドの方を見ていきます。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
 
     <span class="c1"># construct flow_mod message and send it.</span>
     <span class="n">inst</span> <span class="o">=</span> <span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">OFPInstructionActions</span><span class="p">(</span><span class="n">ofproto</span><span class="o">.</span><span class="n">OFPIT_APPLY_ACTIONS</span><span class="p">,</span>
                                          <span class="n">actions</span><span class="p">)]</span>
-
-    <span class="c1"># ...</span>
+<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>フローエントリには、対象となるパケットの条件を示すマッチと、そのパケットに対する操作を示すインストラクション、エントリの優先度、有効時間などを設定します。</p>
 <p>スイッチングハブの実装では、インストラクションにApply Actionsを使用して、指定したアクションを直ちに適用するように設定しています。</p>
 <p>最後に、Flow Modメッセージを発行してフローテーブルにエントリを追加します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
-    <span class="c1"># ...</span>
-
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<span class="c1"># ...</span>
     <span class="n">mod</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPFlowMod</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span>
                             <span class="n">match</span><span class="o">=</span><span class="n">match</span><span class="p">,</span> <span class="n">instructions</span><span class="o">=</span><span class="n">inst</span><span class="p">)</span>
     <span class="n">datapath</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
@@ -610,9 +585,10 @@ eth-src: ホストA
 <h4>パケットの転送<a class="headerlink" href="#id7" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>Packet-Inハンドラに戻り、最後の処理の説明です。</p>
 <p>宛先MACアドレスがMACアドレステーブルから見つかったかどうかに関わらず、最終的にはPacket-Outメッセージを発行して、受信パケットを転送します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-    <span class="c1"># ...</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<span class="c1"># ...</span>
 
+    <span class="c1"># construct packet_out message and send it.</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPPacketOut</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">datapath</span><span class="p">,</span>
                               <span class="n">buffer_id</span><span class="o">=</span><span class="n">ofproto</span><span class="o">.</span><span class="n">OFP_NO_BUFFER</span><span class="p">,</span>
                               <span class="n">in_port</span><span class="o">=</span><span class="n">in_port</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span>
@@ -756,7 +732,7 @@ mininet&gt;
 <p>スイッチのxtermからコマンドを実行して、使用するOpenFlowのバージョンをセットします。ウインドウタイトルが「switch: s1 (root)」となっているものがスイッチ用のxtermです。</p>
 <p>まずはOpen vSwitchの状態を見てみます。</p>
 <p>switch: s1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl show
+<div class="console highlight-python"><div class="highlight"><pre># ovs-vsctl show
 fdec0957-12b6-4417-9d02-847654e9cc1f
 Bridge &quot;s1&quot;
     Controller &quot;ptcp:6634&quot;
@@ -772,7 +748,7 @@ Bridge &quot;s1&quot;
         Interface &quot;s1&quot;
             type: internal
 ovs_version: &quot;1.11.0&quot;
-root@ryu-vm:~# ovs-dpctl show
+# ovs-dpctl show
 system@ovs-system:
         lookups: hit:14 missed:14 lost:0
         flows: 0
@@ -781,21 +757,21 @@ system@ovs-system:
         port 2: s1-eth1
         port 3: s1-eth2
         port 4: s1-eth3
-root@ryu-vm:~#
+#
 </pre></div>
 </div>
 <p>スイッチ(ブリッジ)<em>s1</em>ができていて、ホストに対応するポートが3つ追加されています。</p>
 <p>次にOpenFlowのバージョンとして1.3を設定します。</p>
 <p>switch: s1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
-root@ryu-vm:~#
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
+<span class="c1">#</span>
 </pre></div>
 </div>
 <p>空のフローテーブルを確認してみます。</p>
 <p>switch: s1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-ofctl -O OpenFlow13 dump-flows s1
+<div class="console highlight-python"><div class="highlight"><pre># ovs-ofctl -O OpenFlow13 dump-flows s1
 OFPST_FLOW reply (OF1.3) (xid=0x2):
-root@ryu-vm:~#
+#
 </pre></div>
 </div>
 <p>ovs-ofctlコマンドには、オプションで使用するOpenFlowのバージョンを指定する必要があります。デフォルトは<em>OpenFlow10</em>です。</p>
@@ -805,27 +781,29 @@ root@ryu-vm:~#
 <p>準備が整ったので、Ryuアプリケーションを実行します。</p>
 <p>ウインドウタイトルが「controller: c0 (root)」となっているxtermから次のコマンドを実行します。</p>
 <p>controller: c0:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ryu-manager --verbose ryu.app.simple_switch_13
-loading app ryu.app.simple_switch_13
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager --verbose ryu.app.example_switch_13
+loading app ryu.app.example_switch_13
 loading app ryu.controller.ofp_handler
-instantiating app ryu.app.simple_switch_13
-instantiating app ryu.controller.ofp_handler
-BRICK SimpleSwitch13
-  CONSUMES EventOFPSwitchFeatures
+instantiating app ryu.app.example_switch_13 of ExampleSwitch13
+instantiating app ryu.controller.ofp_handler of OFPHandler
+BRICK ExampleSwitch13
   CONSUMES EventOFPPacketIn
+  CONSUMES EventOFPSwitchFeatures
 BRICK ofp_event
-  PROVIDES EventOFPSwitchFeatures TO {&#39;SimpleSwitch13&#39;: set([&#39;config&#39;])}
-  PROVIDES EventOFPPacketIn TO {&#39;SimpleSwitch13&#39;: set([&#39;main&#39;])}
+  PROVIDES EventOFPPacketIn TO {&#39;ExampleSwitch13&#39;: set([&#39;main&#39;])}
+  PROVIDES EventOFPSwitchFeatures TO {&#39;ExampleSwitch13&#39;: set([&#39;config&#39;])}
   CONSUMES EventOFPErrorMsg
   CONSUMES EventOFPHello
   CONSUMES EventOFPEchoRequest
-  CONSUMES EventOFPPortDescStatsReply
+  CONSUMES EventOFPEchoReply
+  CONSUMES EventOFPPortStatus
   CONSUMES EventOFPSwitchFeatures
-connected socket:&lt;eventlet.greenio.GreenSocket object at 0x2e2c050&gt; address:(&#39;127.0.0.1&#39;, 53937)
-hello ev &lt;ryu.controller.ofp_event.EventOFPHello object at 0x2e2a550&gt;
+  CONSUMES EventOFPPortDescStatsReply
+connected socket:&lt;eventlet.greenio.base.GreenSocket object at 0x7f1239937a90&gt; address:(&#39;127.0.0.1&#39;, 37898)
+hello ev &lt;ryu.controller.ofp_event.EventOFPHello object at 0x7f1239927d50&gt;
 move onto config mode
-EVENT ofp_event-&gt;SimpleSwitch13 EventOFPSwitchFeatures
-switch features ev version: 0x4 msg_type 0x6 xid 0xff9ad15b OFPSwitchFeatures(auxiliary_id=0,capabilities=71,datapath_id=1,n_buffers=256,n_tables=254)
+EVENT ofp_event-&gt;ExampleSwitch13 EventOFPSwitchFeatures
+switch features ev version=0x4,msg_type=0x6,msg_len=0x20,xid=0xea43ed30,OFPSwitchFeatures(auxiliary_id=0,capabilities=79,datapath_id=1,n_buffers=256,n_tables=254)
 move onto main mode
 </pre></div>
 </div>
@@ -840,10 +818,10 @@ move onto main mode
 <p>これで、OVSと接続し、ハンドシェイクが行われ、Table-missフローエントリが追加され、Packet-Inを待っている状態になっています。</p>
 <p>Table-missフローエントリが追加されていることを確認します。</p>
 <p>switch: s1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-ofctl -O openflow13 dump-flows s1
+<div class="console highlight-python"><div class="highlight"><pre># ovs-ofctl -O openflow13 dump-flows s1
 OFPST_FLOW reply (OF1.3) (xid=0x2):
  cookie=0x0, duration=105.975s, table=0, n_packets=0, n_bytes=0, priority=0 actions=CONTROLLER:65535
-root@ryu-vm:~#
+#
 </pre></div>
 </div>
 <p>優先度が0で、マッチがなく、アクションにCONTROLLER、送信データサイズ65535(0xffff = OFPCML_NO_BUFFER)が指定されています。</p>
@@ -876,19 +854,19 @@ root@ryu-vm:~#
 <p>このような通信が行われるはずです。</p>
 <p>pingコマンドを実行する前に、各ホストでどのようなパケットを受信したかを確認できるようにtcpdumpコマンドを実行しておきます。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h1-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h1-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h1-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 </pre></div>
 </div>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h2-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h2-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h2-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 </pre></div>
 </div>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h3-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h3-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h3-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 </pre></div>
@@ -907,12 +885,12 @@ mininet&gt;
 <p>ICMP echo replyは正常に返ってきました。</p>
 <p>まずはフローテーブルを確認してみましょう。</p>
 <p>switch: s1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-ofctl -O openflow13 dump-flows s1
+<div class="console highlight-python"><div class="highlight"><pre># ovs-ofctl -O openflow13 dump-flows s1
 OFPST_FLOW reply (OF1.3) (xid=0x2):
  cookie=0x0, duration=417.838s, table=0, n_packets=3, n_bytes=182, priority=0 actions=CONTROLLER:65535
  cookie=0x0, duration=48.444s, table=0, n_packets=2, n_bytes=140, priority=1,in_port=2,dl_dst=00:00:00:00:00:01 actions=output:1
  cookie=0x0, duration=48.402s, table=0, n_packets=1, n_bytes=42, priority=1,in_port=1,dl_dst=00:00:00:00:00:02 actions=output:2
-root@ryu-vm:~#
+#
 </pre></div>
 </div>
 <p>Table-missフローエントリ以外に、優先度が1のフローエントリが2つ登録されています。</p>
@@ -921,13 +899,13 @@ root@ryu-vm:~#
 <li>受信ポート(in_port):1, 宛先MACアドレス(dl_dst):ホスト2 →動作(actions):ポート2に転送</li>
 </ol>
 <p>(1)のエントリは2回参照され(n_packets)、(2)のエントリは1回参照されています。(1)はホスト2からホスト1宛の通信なので、ARP replyとICMP echo replyの2つがマッチしたものでしょう。(2)はホスト1からホスト2宛の通信で、ARP requestはブロードキャストされるので、これはICMP echo requestによるもののはずです。</p>
-<p>それでは、simple_switch_13のログ出力を見てみます。</p>
+<p>それでは、example_switch_13のログ出力を見てみます。</p>
 <p>controller: c0:</p>
-<div class="console highlight-python"><div class="highlight"><pre>EVENT ofp_event-&gt;SimpleSwitch13 EventOFPPacketIn
+<div class="console highlight-python"><div class="highlight"><pre>EVENT ofp_event-&gt;ExampleSwitch13 EventOFPPacketIn
 packet in 1 00:00:00:00:00:01 ff:ff:ff:ff:ff:ff 1
-EVENT ofp_event-&gt;SimpleSwitch13 EventOFPPacketIn
+EVENT ofp_event-&gt;ExampleSwitch13 EventOFPPacketIn
 packet in 1 00:00:00:00:00:02 00:00:00:00:00:01 2
-EVENT ofp_event-&gt;SimpleSwitch13 EventOFPPacketIn
+EVENT ofp_event-&gt;ExampleSwitch13 EventOFPPacketIn
 packet in 1 00:00:00:00:00:01 00:00:00:00:00:02 1
 </pre></div>
 </div>
@@ -937,7 +915,7 @@ packet in 1 00:00:00:00:00:01 00:00:00:00:00:02 1
 <p>ホスト2からホスト1に返されたICMP echo replyは、登録済みのフローエントリ(1)にマッチするため、Packet-Inは発行されずにホスト1へ転送されます。</p>
 <p>最後に各ホストで実行したtcpdumpの出力を見てみます。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h1-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h1-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h1-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 20:38:04.625473 00:00:00:00:00:01 &gt; ff:ff:ff:ff:ff:ff, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.2 tell 10.0.0.1, length 28
@@ -948,7 +926,7 @@ listening on h1-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 </div>
 <p>ホスト1では、最初にARP requestがブロードキャストされていて、続いてホスト2から返されたARP replyを受信しています。次にホスト1が発行したICMP echo request、ホスト2から返されたICMP echo replyが受信されています。</p>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h2-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h2-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h2-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 20:38:04.637987 00:00:00:00:00:01 &gt; ff:ff:ff:ff:ff:ff, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.2 tell 10.0.0.1, length 28
@@ -959,7 +937,7 @@ listening on h2-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 </div>
 <p>ホスト2では、ホスト1が発行したARP requestを受信し、ホスト1にARP replyを返しています。続いて、ホスト1からのICMP echo requestを受信し、ホスト1にecho replyを返しています。</p>
 <p>host: h3:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# tcpdump -en -i h3-eth0
+<div class="console highlight-python"><div class="highlight"><pre># tcpdump -en -i h3-eth0
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on h3-eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
 20:38:04.637954 00:00:00:00:00:01 &gt; ff:ff:ff:ff:ff:ff, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.2 tell 10.0.0.1, length 28

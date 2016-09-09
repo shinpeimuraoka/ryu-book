@@ -62,7 +62,7 @@
 <div class="section" id="id3">
 <h2>トラフィックモニターの実装<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>早速ですが、「<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>スイッチングハブ</span></a>」で説明したスイッチングハブにトラフィックモニター機能を追加したソースコードです。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span>
 
 <span class="kn">from</span> <span class="nn">ryu.app</span> <span class="kn">import</span> <span class="n">simple_switch_13</span>
 <span class="kn">from</span> <span class="nn">ryu.controller</span> <span class="kn">import</span> <span class="n">ofp_event</span>
@@ -71,10 +71,10 @@
 <span class="kn">from</span> <span class="nn">ryu.lib</span> <span class="kn">import</span> <span class="n">hub</span>
 
 
-<span class="k">class</span> <span class="nc">SimpleMonitor</span><span class="p">(</span><span class="n">simple_switch_13</span><span class="o">.</span><span class="n">SimpleSwitch13</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SimpleMonitor13</span><span class="p">(</span><span class="n">simple_switch_13</span><span class="o">.</span><span class="n">SimpleSwitch13</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleMonitor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleMonitor13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="n">hub</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_monitor</span><span class="p">)</span>
 
@@ -83,7 +83,7 @@
     <span class="k">def</span> <span class="nf">_state_change_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
         <span class="n">datapath</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">datapath</span>
         <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">MAIN_DISPATCHER</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;register datapath: </span><span class="si">%016x</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">[</span><span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">datapath</span>
         <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">DEAD_DISPATCHER</span><span class="p">:</span>
@@ -138,42 +138,35 @@
                          <span class="s1">&#39;-------- -------- -------- &#39;</span>
                          <span class="s1">&#39;-------- -------- --------&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;port_no&#39;</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%016x</span><span class="s1"> </span><span class="si">%8x</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1">&#39;</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%016x</span><span class="s1"> </span><span class="si">%8x</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1"> </span><span class="si">%8d</span><span class="s1">&#39;</span><span class="p">,</span>
                              <span class="n">ev</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">port_no</span><span class="p">,</span>
                              <span class="n">stat</span><span class="o">.</span><span class="n">rx_packets</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">rx_bytes</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">rx_errors</span><span class="p">,</span>
                              <span class="n">stat</span><span class="o">.</span><span class="n">tx_packets</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">tx_bytes</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">tx_errors</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>SimpleSwitch13を継承したSimpleMonitorクラスに、トラフィックモニター機能を実装していますので、ここにはパケット転送に関する処理は出てきません。</p>
+<p>SimpleSwitch13を継承したSimpleMonitor13クラスに、トラフィックモニター機能を実装していますので、ここにはパケット転送に関する処理は出てきません。</p>
 <div class="section" id="id4">
 <h3>定周期処理<a class="headerlink" href="#id4" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>スイッチングハブの処理と並行して、定期的に統計情報取得のリクエストをOpenFlowスイッチへ発行するために、スレッドを生成します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span>
-
-<span class="kn">from</span> <span class="nn">ryu.app</span> <span class="kn">import</span> <span class="n">simple_switch_13</span>
-<span class="kn">from</span> <span class="nn">ryu.controller</span> <span class="kn">import</span> <span class="n">ofp_event</span>
-<span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">MAIN_DISPATCHER</span><span class="p">,</span> <span class="n">DEAD_DISPATCHER</span>
-<span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">set_ev_cls</span>
-<span class="kn">from</span> <span class="nn">ryu.lib</span> <span class="kn">import</span> <span class="n">hub</span>
-
-
-<span class="k">class</span> <span class="nc">SimpleMonitor</span><span class="p">(</span><span class="n">simple_switch_13</span><span class="o">.</span><span class="n">SimpleSwitch13</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SimpleMonitor13</span><span class="p">(</span><span class="n">simple_switch_13</span><span class="o">.</span><span class="n">SimpleSwitch13</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleMonitor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SimpleMonitor13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor_thread</span> <span class="o">=</span> <span class="n">hub</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_monitor</span><span class="p">)</span>
+
 <span class="c1"># ...</span>
 </pre></div>
 </div>
 <p><code class="docutils literal"><span class="pre">ryu.lib.hub</span></code>には、いくつかのeventletのラッパーや基本的なクラスの実装があります。ここではスレッドを生成する<code class="docutils literal"><span class="pre">hub.spawn()</span></code>を使用します。実際に生成されるスレッドはeventletのグリーンスレッドです。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="c1"># ...</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># ...</span>
+
 <span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPStateChange</span><span class="p">,</span>
             <span class="p">[</span><span class="n">MAIN_DISPATCHER</span><span class="p">,</span> <span class="n">DEAD_DISPATCHER</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">_state_change_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">datapath</span>
     <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">MAIN_DISPATCHER</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;register datapath: </span><span class="si">%016x</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="p">[</span><span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">datapath</span>
     <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">DEAD_DISPATCHER</span><span class="p">:</span>
@@ -186,14 +179,14 @@
         <span class="k">for</span> <span class="n">dp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapaths</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_request_stats</span><span class="p">(</span><span class="n">dp</span><span class="p">)</span>
         <span class="n">hub</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
 <span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>スレッド関数<code class="docutils literal"><span class="pre">_monitor()</span></code>では、登録されたスイッチに対する統計情報取得リクエストの発行を10秒間隔で無限に繰り返します。</p>
 <p>接続中のスイッチを監視対象とするため、スイッチの接続および切断の検出に<code class="docutils literal"><span class="pre">EventOFPStateChange</span></code>イベントを利用しています。このイベントはRyuフレームワークが発行するもので、Datapathのステートが変わったときに発行されます。</p>
 <p>ここでは、Datapathのステートが<code class="docutils literal"><span class="pre">MAIN_DISPATCHER</span></code>になった時にそのスイッチを監視対象に登録、<code class="docutils literal"><span class="pre">DEAD_DISPATCHER</span></code>になった時に登録の削除を行っています。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="c1"># ...</span>
-<span class="k">def</span> <span class="nf">_request_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_request_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;send stats request: </span><span class="si">%016x</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">datapath</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
@@ -203,7 +196,6 @@
 
     <span class="n">req</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPPortStatsRequest</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ofproto</span><span class="o">.</span><span class="n">OFPP_ANY</span><span class="p">)</span>
     <span class="n">datapath</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
-<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>定期的に呼び出される<code class="docutils literal"><span class="pre">_request_stats()</span></code>では、スイッチに<code class="docutils literal"><span class="pre">OFPFlowStatsRequest</span></code>と<code class="docutils literal"><span class="pre">OFPPortStatsRequest</span></code>を発行しています。</p>
@@ -213,8 +205,7 @@
 <div class="section" id="flowstats">
 <h3>FlowStats<a class="headerlink" href="#flowstats" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>スイッチからの応答を受け取るため、FlowStatsReplyメッセージを受信するイベントハンドラを作成します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="c1"># ...</span>
-<span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPFlowStatsReply</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPFlowStatsReply</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_flow_stats_reply_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">body</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">body</span>
 
@@ -232,7 +223,6 @@
                          <span class="n">stat</span><span class="o">.</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;in_port&#39;</span><span class="p">],</span> <span class="n">stat</span><span class="o">.</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;eth_dst&#39;</span><span class="p">],</span>
                          <span class="n">stat</span><span class="o">.</span><span class="n">instructions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
                          <span class="n">stat</span><span class="o">.</span><span class="n">packet_count</span><span class="p">,</span> <span class="n">stat</span><span class="o">.</span><span class="n">byte_count</span><span class="p">)</span>
-<span class="c1"># ...</span>
 </pre></div>
 </div>
 <p><code class="docutils literal"><span class="pre">OPFFlowStatsReply</span></code>クラスの属性<code class="docutils literal"><span class="pre">body</span></code>は、<code class="docutils literal"><span class="pre">OFPFlowStats</span></code>のリストで、FlowStatsRequestの対象となった各フローエントリの統計情報が格納されています。</p>
@@ -357,8 +347,7 @@
 <div class="section" id="portstats">
 <h3>PortStats<a class="headerlink" href="#portstats" title="このヘッドラインへのパーマリンク">¶</a></h3>
 <p>スイッチからの応答を受け取るため、PortStatsReplyメッセージを受信するイベントハンドラを作成します。</p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="c1"># ...</span>
-<span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPortStatsReply</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPortStatsReply</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_port_stats_reply_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">body</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">body</span>
 
@@ -386,41 +375,43 @@
 <p>まず、「<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>スイッチングハブ</span></a>」と同様にMininetを実行します。ここで、スイッチのOpenFlowバージョンにOpenFlow13を設定することを忘れないでください。</p>
 <p>次にいよいよトラフィックモニターの実行です。</p>
 <p>controller: c0:</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~# ryu-manager --verbose ./simple_monitor.py
-loading app ./simple_monitor.py
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager --verbose ryu.app.simple_monitor_13
+loading app ryu.app.simple_monitor_13
 loading app ryu.controller.ofp_handler
-instantiating app ./simple_monitor.py
-instantiating app ryu.controller.ofp_handler
-BRICK SimpleMonitor
+instantiating app ryu.app.simple_monitor_13 of SimpleMonitor13
+instantiating app ryu.controller.ofp_handler of OFPHandler
+BRICK SimpleMonitor13
+  CONSUMES EventOFPPacketIn
+  CONSUMES EventOFPPortStatsReply
   CONSUMES EventOFPStateChange
   CONSUMES EventOFPFlowStatsReply
-  CONSUMES EventOFPPortStatsReply
-  CONSUMES EventOFPPacketIn
   CONSUMES EventOFPSwitchFeatures
 BRICK ofp_event
-  PROVIDES EventOFPStateChange TO {&#39;SimpleMonitor&#39;: set([&#39;main&#39;, &#39;dead&#39;])}
-  PROVIDES EventOFPFlowStatsReply TO {&#39;SimpleMonitor&#39;: set([&#39;main&#39;])}
-  PROVIDES EventOFPPortStatsReply TO {&#39;SimpleMonitor&#39;: set([&#39;main&#39;])}
-  PROVIDES EventOFPPacketIn TO {&#39;SimpleMonitor&#39;: set([&#39;main&#39;])}
-  PROVIDES EventOFPSwitchFeatures TO {&#39;SimpleMonitor&#39;: set([&#39;config&#39;])}
-  CONSUMES EventOFPErrorMsg
-  CONSUMES EventOFPPortDescStatsReply
-  CONSUMES EventOFPHello
-  CONSUMES EventOFPEchoRequest
+  PROVIDES EventOFPPacketIn TO {&#39;SimpleMonitor13&#39;: set([&#39;main&#39;])}
+  PROVIDES EventOFPPortStatsReply TO {&#39;SimpleMonitor13&#39;: set([&#39;main&#39;])}
+  PROVIDES EventOFPStateChange TO {&#39;SimpleMonitor13&#39;: set([&#39;main&#39;, &#39;dead&#39;])}
+  PROVIDES EventOFPFlowStatsReply TO {&#39;SimpleMonitor13&#39;: set([&#39;main&#39;])}
+  PROVIDES EventOFPSwitchFeatures TO {&#39;SimpleMonitor13&#39;: set([&#39;config&#39;])}
+  CONSUMES EventOFPPortStatus
   CONSUMES EventOFPSwitchFeatures
-connected socket:&lt;eventlet.greenio.GreenSocket object at 0x343fb10&gt; address:(&#39;127.0.0.1&#39;, 55598)
-hello ev &lt;ryu.controller.ofp_event.EventOFPHello object at 0x343fed0&gt;
+  CONSUMES EventOFPEchoReply
+  CONSUMES EventOFPPortDescStatsReply
+  CONSUMES EventOFPErrorMsg
+  CONSUMES EventOFPEchoRequest
+  CONSUMES EventOFPHello
+connected socket:&lt;eventlet.greenio.base.GreenSocket object at 0x7fbab7189750&gt; address:(&#39;127.0.0.1&#39;, 37934)
+hello ev &lt;ryu.controller.ofp_event.EventOFPHello object at 0x7fbab7179a90&gt;
 move onto config mode
-EVENT ofp_event-&gt;SimpleMonitor EventOFPSwitchFeatures
-switch features ev version: 0x4 msg_type 0x6 xid 0x7dd2dc58 OFPSwitchFeatures(auxiliary_id=0,capabilities=71,datapath_id=1,n_buffers=256,n_tables=254)
+EVENT ofp_event-&gt;SimpleMonitor13 EventOFPSwitchFeatures
+switch features ev version=0x4,msg_type=0x6,msg_len=0x20,xid=0x21014c5c,OFPSwitchFeatures(auxiliary_id=0,capabilities=79,datapath_id=1,n_buffers=256,n_tables=254)
 move onto main mode
-EVENT ofp_event-&gt;SimpleMonitor EventOFPStateChange
+EVENT ofp_event-&gt;SimpleMonitor13 EventOFPStateChange
 register datapath: 0000000000000001
 send stats request: 0000000000000001
-EVENT ofp_event-&gt;SimpleMonitor EventOFPFlowStatsReply
+EVENT ofp_event-&gt;SimpleMonitor13 EventOFPFlowStatsReply
+EVENT ofp_event-&gt;SimpleMonitor13 EventOFPPortStatsReply
 datapath         in-port  eth-dst           out-port packets  bytes
 ---------------- -------- ----------------- -------- -------- --------
-EVENT ofp_event-&gt;SimpleMonitor EventOFPPortStatsReply
 datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error
 ---------------- -------- -------- -------- -------- -------- -------- --------
 0000000000000001        1        0        0        0        0        0        0
@@ -429,18 +420,18 @@ datapath         port     rx-pkts  rx-bytes rx-error tx-pkts  tx-bytes tx-error
 0000000000000001 fffffffe        0        0        0        0        0        0
 </pre></div>
 </div>
-<p>「<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>スイッチングハブ</span></a>」では、ryu-managerコマンドにSimpleSwitch13のモジュール名(ryu.app.simple_switch_13)を指定しましたが、ここでは、SimpleMonitorのファイル名(./simple_monitor.py)を指定しています。</p>
+<p>「<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>スイッチングハブ</span></a>」では、ryu-managerコマンドにSimpleSwitch13のモジュール名(ryu.app.example_switch_13)を指定しましたが、ここでは、SimpleMonitor13のモジュール名(ryu.app.simple_monitor_13)を指定しています。</p>
 <p>この時点では、フローエントリが無く(Table-missフローエントリは表示していません)、各ポートのカウントもすべて0です。</p>
 <p>ホスト1からホスト2へpingを実行してみましょう。</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ping -c1 10.0.0.2
+<div class="console highlight-python"><div class="highlight"><pre># ping -c1 10.0.0.2
 PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
 64 bytes from 10.0.0.2: icmp_req=1 ttl=64 time=94.4 ms
 
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 received, 0% packet loss, time 0ms
 rtt min/avg/max/mdev = 94.489/94.489/94.489/0.000 ms
-root@ryu-vm:~#
+#
 </pre></div>
 </div>
 <p>パケットの転送や、フローエントリが登録され、統計情報が変化します。</p>

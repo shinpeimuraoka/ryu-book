@@ -101,7 +101,7 @@ follows.</p>
 </tbody>
 </table>
 <p>An execution example is as follows.</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -129,22 +129,22 @@ mininet&gt;
 <p>Next, set the version of OpenFlow to be used in each router to version 1.3
 and set to listen on port 6632 to access OVSDB.</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
-root@ryu-vm:~# ovs-vsctl set-manager ptcp:6632
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
+<span class="c1"># ovs-vsctl set-manager ptcp:6632</span>
 </pre></div>
 </div>
 <p>Then, modify simple_switch_13.py used in &#8220;<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a>&#8221;.
 rest_qos.py suppose to be processed on Flow Table pipeline processing,
 modify simple_switch_13.py to register flow entry into table id:1.</p>
 <p>controller: c0 (root)</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py
-root@ryu-vm:~# cd ryu/; python ./setup.py install
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py</span>
+<span class="c1"># cd ryu/; python ./setup.py install</span>
 </pre></div>
 </div>
 <p>Finally, start rest_qos, qos_simple_switch_13 and rest_conf_switch on xterm of
 controller.</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@mininet-vm:~/ryu# ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13 ryu.app.rest_conf_switch
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13 ryu.app.rest_conf_switch
 loading app ryu.app.rest_qos
 loading app ryu.app.qos_simple_switch_13
 loading app ryu.app.rest_conf_switch
@@ -204,12 +204,12 @@ message appears.</p>
 </div>
 <p>First, set ovsdb_addr in order to access OVSDB.</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr
-root@ryu-vm:~#
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr</span>
+<span class="c1">#</span>
 </pre></div>
 </div>
 <p>Also, execute setting of Queue.</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;: [{&quot;max_rate&quot;: &quot;500000&quot;}, {&quot;min_rate&quot;: &quot;800000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;: [{&quot;max_rate&quot;: &quot;500000&quot;}, {&quot;min_rate&quot;: &quot;800000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -269,7 +269,7 @@ root@ryu-vm:~#
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;10.0.0.1&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;10.0.0.1&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -288,7 +288,7 @@ root@ryu-vm:~#
 <h3>Verifying the Setting<a class="headerlink" href="#verifying-the-setting" title="Permalink to this headline">¶</a></h3>
 <p>Check the contents of the setting of the switch.</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X GET http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -335,23 +335,23 @@ mininet&gt; xterm h2
 </pre></div>
 </div>
 <p>Node: h1(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -s -u -i 1 -p 5001
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -s -u -i 1 -p 5001</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>Node: h1(2) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -s -u -i 1 -p 5002
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -s -u -i 1 -p 5002</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>Node: h2(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5001 -u -b 1M
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -c 10.0.0.1 -p 5001 -u -b 1M</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>Node: h2(2) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5002 -u -b 1M
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -c 10.0.0.1 -p 5002 -u -b 1M</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>Node: h1(1) (root):</p>
@@ -468,7 +468,7 @@ follows.</p>
 </tbody>
 </table>
 <p>An execution example is as follows.</p>
-<div class="console highlight-python"><div class="highlight"><pre>ryu@ryu-vm:~$ sudo mn --topo linear,2 --mac --switch ovsk --controller remote -x
+<div class="console highlight-python"><div class="highlight"><pre>$ sudo mn --topo linear,2 --mac --switch ovsk --controller remote -x
 *** Creating network
 *** Adding controller
 Unable to contact the remote controller at 127.0.0.1:6633
@@ -496,38 +496,38 @@ mininet&gt;
 <p>Next, set the version of OpenFlow to be used in each router to version 1.3
 and set to listen on port 6632 to access OVSDB.</p>
 <p>switch: s1 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s1 protocols=OpenFlow13
-root@ryu-vm:~# ovs-vsctl set-manager ptcp:6632
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
+<span class="c1"># ovs-vsctl set-manager ptcp:6632</span>
 </pre></div>
 </div>
 <p>switch: s2 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ovs-vsctl set Bridge s2 protocols=OpenFlow13
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ovs-vsctl set Bridge s2 protocols=OpenFlow13</span>
 </pre></div>
 </div>
 <p>Then, delete the IP address that is assigned automatically on each host and
 set a new IP address.</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.1/8 dev h1-eth0
-root@ryu-vm:~# ip addr add 172.16.20.10/24 dev h1-eth0
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.1/8 dev h1-eth0</span>
+<span class="c1"># ip addr add 172.16.20.10/24 dev h1-eth0</span>
 </pre></div>
 </div>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip addr del 10.0.0.2/8 dev h2-eth0
-root@ryu-vm:~# ip addr add 172.16.10.10/24 dev h2-eth0
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip addr del 10.0.0.2/8 dev h2-eth0</span>
+<span class="c1"># ip addr add 172.16.10.10/24 dev h2-eth0</span>
 </pre></div>
 </div>
 <p>And, modify rest_router.py used in &#8220;<a class="reference internal" href="rest_router.html#ch-rest-router"><span>Router</span></a>&#8221;.
 rest_qos.py suppose to be processed on Flow Table pipeline processing,
 modify rest_router.py to register flow entry into table id:1.</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# sed &#39;/OFPFlowMod(/,/)/s/0, cmd/1, cmd/&#39; ryu/ryu/app/rest_router.py &gt; ryu/ryu/app/qos_rest_router.py
-root@ryu-vm:~# cd ryu/; python ./setup.py install
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/0, cmd/1, cmd/&#39; ryu/ryu/app/rest_router.py &gt; ryu/ryu/app/qos_rest_router.py</span>
+<span class="c1"># cd ryu/; python ./setup.py install</span>
 </pre></div>
 </div>
 <p>Finally, start rest_qos, qos_rest_router and rest_conf_switch on xterm of
 controller.</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@mininet-vm:~/ryu# ryu-manager ryu.app.rest_qos ryu.app.qos_rest_router ryu.app.rest_conf_switch
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_qos ryu.app.qos_rest_router ryu.app.rest_conf_switch
 loading app ryu.app.rest_qos
 loading app ryu.app.qos_rest_router
 loading app ryu.app.rest_conf_switch
@@ -609,12 +609,12 @@ message appears.</p>
 </div>
 <p>First, set ovsdb_addr in order to access OVSDB.</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr
-root@ryu-vm:~#
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr</span>
+<span class="c1">#</span>
 </pre></div>
 </div>
 <p>Also, execute setting of Queue.</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;:[{&quot;max_rate&quot;: &quot;1000000&quot;}, {&quot;min_rate&quot;: &quot;200000&quot;}, {&quot;min_rate&quot;: &quot;500000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;:[{&quot;max_rate&quot;: &quot;1000000&quot;}, {&quot;min_rate&quot;: &quot;200000&quot;}, {&quot;min_rate&quot;: &quot;500000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -650,7 +650,7 @@ root@ryu-vm:~#
 <div class="section" id="router-setting">
 <h3>Router Setting<a class="headerlink" href="#router-setting" title="Permalink to this headline">¶</a></h3>
 <p>Set the IP address and the default route for each router.</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.20.1/24&quot;}&#39; http://localhost:8080/router/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.20.1/24&quot;}&#39; http://localhost:8080/router/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -663,7 +663,7 @@ root@ryu-vm:~#
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.10/24&quot;}&#39; http://localhost:8080/router/0000000000000001
+# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.10/24&quot;}&#39; http://localhost:8080/router/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -676,7 +676,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.10/24&
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.1&quot;}&#39; http://localhost:8080/router/0000000000000001
+# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.1&quot;}&#39; http://localhost:8080/router/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -689,7 +689,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.1&quot
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.10.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002
+# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.10.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -702,7 +702,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.10.1/24&q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002
+# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -715,7 +715,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.1/24&q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.10&quot;}&#39; http://localhost:8080/router/0000000000000002
+# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.10&quot;}&#39; http://localhost:8080/router/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -733,11 +733,11 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.10&quo
 <p>The IP address settings for each router are done, register the routers as the
 default gateway to each host.</p>
 <p>host: h1:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip route add default via 172.16.20.1
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip route add default via 172.16.20.1</span>
 </pre></div>
 </div>
 <p>host: h2:</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# ip route add default via 172.16.10.1
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># ip route add default via 172.16.10.1</span>
 </pre></div>
 </div>
 </div>
@@ -773,7 +773,7 @@ router (s1).</p>
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;26&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;26&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -786,7 +786,7 @@ router (s1).</p>
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;34&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;34&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -837,7 +837,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;26&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;26&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -850,7 +850,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5003&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;34&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5003&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;34&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -869,7 +869,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &qu
 <h3>Verifying the Setting<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>Check the contents of the setting of each switch.</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X GET http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -904,7 +904,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &qu
     }
   ]
 
-root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000002
+# curl -X GET http://localhost:8080/qos/rules/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -958,11 +958,11 @@ mininet&gt; xterm h2
 </pre></div>
 </div>
 <p>Node: h1(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -s -u -p 5002 &amp;
+<div class="console highlight-python"><div class="highlight"><pre># iperf -s -u -p 5002 &amp;
 ...
-root@ryu-vm:~# iperf -s -u -p 5003 &amp;
+# iperf -s -u -p 5003 &amp;
 ...
-root@ryu-vm:~# iperf -s -u -i 1 5001
+# iperf -s -u -i 1 5001
 ------------------------------------------------------------
 Server listening on UDP port 5001
 Receiving 1470 byte datagrams
@@ -971,12 +971,12 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h2(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 172.16.20.10 -p 5001 -u -b 1M
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -c 172.16.20.10 -p 5001 -u -b 1M</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>Node: h2(2) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 172.16.20.10 -p 5002 -u -b 300K
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 172.16.20.10 -p 5002 -u -b 300K
 ------------------------------------------------------------
 Client connecting to 172.16.20.10, UDP port 5002
 Sending 1470 byte datagrams
@@ -991,7 +991,7 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h2(3) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 172.16.20.10 -p 5003 -u -b 600K
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 172.16.20.10 -p 5003 -u -b 600K
 ------------------------------------------------------------
 Client connecting to 172.16.20.10, UDP port 5003
 Sending 1470 byte datagrams
@@ -1063,7 +1063,7 @@ However, it is still guaranteed that AF12 class is more preferentially transferr
 <p>First, build an environment on Mininet.
 Build a topology using a python script.</p>
 <p>source code: <code class="docutils literal"><span class="pre">qos_sample_topology.py</span></code></p>
-<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mininet.net</span> <span class="kn">import</span> <span class="n">Mininet</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mininet.net</span> <span class="kn">import</span> <span class="n">Mininet</span>
 <span class="kn">from</span> <span class="nn">mininet.cli</span> <span class="kn">import</span> <span class="n">CLI</span>
 <span class="kn">from</span> <span class="nn">mininet.topo</span> <span class="kn">import</span> <span class="n">Topo</span>
 <span class="kn">from</span> <span class="nn">mininet.node</span> <span class="kn">import</span> <span class="n">UserSwitch</span>
@@ -1145,7 +1145,8 @@ $ sudo make install
 </div>
 </div>
 <p>An execution example is as follows.</p>
-<div class="console highlight-python"><div class="highlight"><pre>mininet@mininet-vm:~$ sudo python qos_sample_topology.py
+<div class="console highlight-python"><div class="highlight"><pre>$ curl -O https://raw.githubusercontent.com/osrg/ryu-book/master/sources/qos_sample_topology.py
+$ sudo python ./qos_sample_topology.py
 Unable to contact the remote controller at 127.0.0.1:6633
 mininet&gt;
 </pre></div>
@@ -1159,13 +1160,13 @@ mininet&gt;
 <p>Next, modify the simple_switch_13.py used in &#8220;<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a>&#8221;.
 rest_qos.py suppose to be processed on Flow Table pipeline processing,modify simple_switch_13.py to register flow entry into table id:1.</p>
 <p>controller: c0 (root)</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py
-root@ryu-vm:~# cd ryu/; python ./setup.py install
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py</span>
+<span class="c1"># cd ryu/; python ./setup.py install</span>
 </pre></div>
 </div>
 <p>Finally, start rest_qos and qos_simple_switch_13 on xterm of controller.</p>
 <p>controller: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@mininet-vm:~/ryu# ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13
+<div class="console highlight-python"><div class="highlight"><pre># ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13
 loading app ryu.app.rest_qos
 loading app ryu.app.qos_simple_switch_13
 loading app ryu.controller.ofp_handler
@@ -1227,7 +1228,7 @@ instantiating app ryu.app.rest_qos of RestQoSAPI
 </tbody>
 </table>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1240,7 +1241,7 @@ instantiating app ryu.app.rest_qos of RestQoSAPI
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1253,7 +1254,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1266,7 +1267,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1279,7 +1280,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1292,7 +1293,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1351,7 +1352,7 @@ prec_level:1</td>
 </tr>
 </tbody>
 </table>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
+<div class="console highlight-python"><div class="highlight"><pre># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -1364,7 +1365,7 @@ prec_level:1</td>
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000002
+# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -1377,7 +1378,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;
     }
   ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000003
+# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000003
 [
   {
     &quot;switch_id&quot;: &quot;0000000000000003&quot;,
@@ -1390,7 +1391,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &q
   }
 ]
 
-root@ryu-vm:~# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000003
+# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000003
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000003&quot;,
@@ -1409,7 +1410,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;
 <h3>Verifying the Setting<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>Check the contents of the setting of each switch.</p>
 <p>Node: c0 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000001
+<div class="console highlight-python"><div class="highlight"><pre># curl -X GET http://localhost:8080/qos/rules/0000000000000001
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000001&quot;,
@@ -1492,7 +1493,7 @@ root@ryu-vm:~# curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;
     }
   ]
 
-root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000002
+# curl -X GET http://localhost:8080/qos/rules/0000000000000002
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000002&quot;,
@@ -1516,7 +1517,7 @@ root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000002
     }
   ]
 
-root@ryu-vm:~# curl -X GET http://localhost:8080/qos/rules/0000000000000003
+# curl -X GET http://localhost:8080/qos/rules/0000000000000003
   [
     {
       &quot;switch_id&quot;: &quot;0000000000000003&quot;,
@@ -1556,16 +1557,16 @@ mininet&gt; xterm h3
 </pre></div>
 </div>
 <p>Node: h1(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -s -u -p 5001 &amp;
-root@ryu-vm:~# iperf -s -u -p 5002 &amp;
-root@ryu-vm:~# iperf -s -u -p 5003 &amp;
-...
+<div class="console highlight-python"><div class="highlight"><pre><span class="c1"># iperf -s -u -p 5001 &amp;</span>
+<span class="c1"># iperf -s -u -p 5002 &amp;</span>
+<span class="c1"># iperf -s -u -p 5003 &amp;</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <div class="section" id="best-effort-traffic-af11-excess-traffic">
 <h4>Best-effort traffic &amp; AF11 excess traffic<a class="headerlink" href="#best-effort-traffic-af11-excess-traffic" title="Permalink to this headline">¶</a></h4>
 <p>Node: h2 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5001 -u -b 800K
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5001 -u -b 800K
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5001
 Sending 1470 byte datagrams
@@ -1580,7 +1581,7 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h3(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5002
 Sending 1470 byte datagrams
@@ -1601,7 +1602,7 @@ AF11 is more preferentially guaranteed bandwidth than traffic of best effort.</p
 <div class="section" id="af11-excess-traffic-best-effort-traffic-af11-non-excess-traffic">
 <h4>AF11 excess traffic &amp; Best-effort traffic &amp; AF11 non-excess traffic<a class="headerlink" href="#af11-excess-traffic-best-effort-traffic-af11-non-excess-traffic" title="Permalink to this headline">¶</a></h4>
 <p>Node: h2 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5001
 Sending 1470 byte datagrams
@@ -1617,7 +1618,7 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h3(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5002 -u -b 500K
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5002 -u -b 500K
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5002
 Sending 1470 byte datagrams
@@ -1633,7 +1634,7 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h3(2) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5003 -u -b 400K --tos 0x28
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5003 -u -b 400K --tos 0x28
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5003
 Sending 1470 byte datagrams
@@ -1652,7 +1653,7 @@ UDP buffer size:  208 KByte (default)
 <div class="section" id="af11-excess-traffic-af11-excess-traffic">
 <h4>AF11 excess traffic &amp; AF11 excess traffic<a class="headerlink" href="#af11-excess-traffic-af11-excess-traffic" title="Permalink to this headline">¶</a></h4>
 <p>Node: h2 (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5001
 Sending 1470 byte datagrams
@@ -1668,7 +1669,7 @@ UDP buffer size:  208 KByte (default)
 </pre></div>
 </div>
 <p>Node: h3(1) (root):</p>
-<div class="console highlight-python"><div class="highlight"><pre>root@ryu-vm:~# iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28
+<div class="console highlight-python"><div class="highlight"><pre># iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28
 ------------------------------------------------------------
 Client connecting to 10.0.0.1, UDP port 5002
 Sending 1470 byte datagrams
