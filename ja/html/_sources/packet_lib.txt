@@ -167,6 +167,8 @@ ARP REQUESTとICMP ECHO REQUESTをPacket-Inで受けとり、
 返事をPacket-Outで送信します。
 IPアドレス等は__init__メソッド内にハードコードされています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../sources/ping_responder.py
     :lines: 19-
 

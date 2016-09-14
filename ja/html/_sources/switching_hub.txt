@@ -169,6 +169,8 @@ simple_switch_12.py(OpenFlow 1.2)がありますが、ここではOpenFlow 1.3�
 
 短いソースコードなので、全体をここに掲載します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :lines: 16-
 
@@ -188,6 +190,8 @@ OpenFlowプロトコルでは、OpenFlowスイッチとコントローラが通�
 必要となるハンドシェイクなどのいくつかの手順が決められていますが、Ryuの
 フレームワークが処理してくれるため、Ryuアプリケーションでは意識する必要は
 ありません。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :pyobject: ExampleSwitch13
@@ -233,6 +237,8 @@ OpenFlowスイッチとのハンドシェイク完了後にTable-missフロー�
 
 具体的には、Switch Features(Features Reply)メッセージを受け取り、そこで
 Table-missフローエントリの追加を行います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
@@ -283,6 +289,8 @@ send_msg(msg)
 使いません。Table-missフローエントリを追加するタイミングを得るための
 イベントとして扱っています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
     :prepend: def switch_features_handler(self, ev):
@@ -321,6 +329,8 @@ Packet-inメッセージ
 
 未知の宛先の受信パケットを受け付けるため、Packet-Inイベントのハンドラを作成します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
     :prepend: @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -348,6 +358,8 @@ buffer_id 受信パケットがOpenFlowスイッチ上でバッファされて�
 MACアドレステーブルの更新
 """""""""""""""""""""""""
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
     :prepend: def _packet_in_handler(self, ev):
@@ -374,6 +386,8 @@ OFPPacketInクラスのmatchから、受信ポート(``in_port``)を取得しま
 宛先MACアドレスが、MACアドレステーブルに存在する場合は対応するポート番号を、
 見つからなかった場合はフラッディング(``OFPP_FLOOD``)を出力ポートに指定した
 OUTPUTアクションクラスのインスタンスを生成します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
@@ -420,6 +434,8 @@ Table-missフローエントリとは違って、今回はマッチに条件を�
 Packet-Inハンドラの処理がまだ終わっていませんが、ここで一旦フローエントリ
 を追加するメソッドの方を見ていきます。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
     :pyobject: ExampleSwitch13.add_flow
@@ -434,6 +450,8 @@ Packet-Inハンドラの処理がまだ終わっていませんが、ここで�
 指定したアクションを直ちに適用するように設定しています。
 
 最後に、Flow Modメッセージを発行してフローテーブルにエントリを追加します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4
@@ -567,6 +585,8 @@ Packet-Inハンドラに戻り、最後の処理の説明です。
 
 宛先MACアドレスがMACアドレステーブルから見つかったかどうかに関わらず、最終的
 にはPacket-Outメッセージを発行して、受信パケットを転送します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/example_switch_13.py
     :dedent: 4

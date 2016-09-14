@@ -167,6 +167,8 @@ This program is an application to which the spanning tree function has been adde
 
 Source name: ``simple_switch_stp_13.py``
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :lines: 16-
 
@@ -217,6 +219,8 @@ To operate using a special topology having a loop structure, as with " :ref:`ch_
 
 
 Source name: ``spanning_tree.py``
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../sources/spanning_tree.py
 
@@ -869,10 +873,14 @@ Sending BPDU Packet
 
 BPDU packets are sent by the BPDU packet send thread (``Port.send_bpdu_thread``) of the Port class. When the port role is the designated port (``DESIGNATED_PORT``), a BPDU packet is generated (``Port._generate_config_bpdu()``) at the hello time (``Port.port_times.hello_time``: by default, 2 seconds) notified by the root bridge and the BPDU packet is sent (``Port.ofctl.send_packet_out()``).
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port.__init__
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -880,6 +888,8 @@ BPDU packets are sent by the BPDU packet send thread (``Port.send_bpdu_thread``)
     :pyobject: Port._transmit_bpdu
 
 BPDU packets to be sent are configured based on the port information (``Port.ofport``) collected when the controller is connected to OpenFlow switches or the root bridge information (``Port.port_priority, Port.port_times``) set in the received BPDU packets.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -893,6 +903,8 @@ Reception of a BPDU packet is detected by the Packet-In event handler of the Stp
 For implementation of the event handler, refer to ":ref:`ch_switching_hub`".
 
 The port that receives a BPDU packet compares (``Stp.compare_bpdu_info()``) the bridge ID of previously received BPDU packets and the BPDU packet received this time to determine the need for STP re-calculation. If a superior BPDU (``SUPERIOR``) than the previously received BPDU is received, it means there is a change in the network topology such as "a new root bridge is added", which is a a trigger for STP re-calculation.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -911,6 +923,8 @@ Timeout of BPDU packet receive waiting is detected by the BPDU packet receive wa
 For update of the BPDU receive waiting timer and detection of timeout, ``hub.Event`` and ``hub.Timeout`` of the hub module (ryu.lib.hub) are used. ``hub.Event`` enters wait status by ``hub.Event.wait()`` and the thread is suspended until ``hub.Event.set()`` is executed. ``hub.Timeout`` issues an ``hub.Timeout`` exception if processing of the ``try`` clause is not completed within the specified timeout time.
 When ``hub.Event`` enters wait status and ``hub.Event.set()`` is not executed within the timeout time specified in ``hub.Timeout``, timeout of BPDU packet receive waiting is determined and STP re-calculation processing of the Bridge class is called.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
@@ -918,10 +932,14 @@ When ``hub.Event`` enters wait status and ``hub.Event.set()`` is not executed wi
 
 When ``SUPERIOR`` or ``REPEATED`` is determined as a result of comparison processing (``Stp.compare_bpdu_info()``) of the received BPDU packet, it means that the BPDU packet from the root bridge can be received. Therefore, the BPDU receive waiting timer is updated (``Port._update_wait_bpdu_timer()``). By the ``set()`` processing of ``Port.wait_timer_event``, which is a ``hub.Event``, the ``Port.wait_timer_event`` is released from wait status and the BPDU packet receive waiting thread (``Port.wait_bpdu_thread``) cancels the timer without entering timeout processing of the ``except hub.Timeout`` clause and sets the timer again to start waiting for the next BPDU packet to be received.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port.rcv_config_bpdu
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -937,6 +955,8 @@ In cases where STP calculation is executed, a change in the network topology has
 
 After that, the root bridge and the role of ports are selected by ``Bridge._spanning_tree_algorithm()``, and each port is started in LISTEN status (``port.up``) to start port status change.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Bridge(object):
               # ...
@@ -948,6 +968,8 @@ As a result, when the root port is found (the other bridge's information receive
 
 On the other hand, if the root port is not found (own bridge information is the most superior), the own bridge is determined to be the root bridge and all other ports are designated ports.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Bridge(object):
               # ...
@@ -958,15 +980,21 @@ Port Status Change
 
 Status change processing of ports is executed by the status change control thread (``Port.state_machine``) of the Port class. It uses ``Port._get_timer()`` to get the timer to change to the next status and after the timer elapses, uses ``Port._get_next_state()`` to get the next status to change the status. Also, the status is changed when ``Port._change_status()`` is executed in case that when STP re-calculation occurs and the status is changed to BLOCK status, regardless of the previous port status. This processing is achieved using ``hub.Event`` and ``hub.Timeout`` of the hub module, as with "`Detecting Failures`_".
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port._state_machine
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port._get_timer
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -983,6 +1011,8 @@ Setting "_CONTEXTS"
 """""""""""""""""""
 
 As with " :ref:`ch_link_aggregation` ", register CONTEXT to use the STP library.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :prepend: from ryu.lib import stplib
@@ -1006,6 +1036,8 @@ dpid=0000000000000003 bridge.priority 0xa000
 
 Using these settings, the bridge ID of the dpid=0000000000000001 OpenFlow switch is always the smallest value and is selected as the root bridge.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :pyobject: SimpleSwitch13.__init__
@@ -1019,6 +1051,8 @@ As with " :ref:`ch_link_aggregation` ", prepare the event handler to receive eve
 
 By using the ``stplib.EventPacketIn`` event defined in the STP library, it is possible to receive packets other than BPDU packets; therefore, the same packet handling is performed as " :ref:`ch_switching_hub` ".
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :prepend: @set_ev_cls(stplib.EventPacketIn, MAIN_DISPATCHER)
@@ -1028,9 +1062,13 @@ By using the ``stplib.EventPacketIn`` event defined in the STP library, it is po
 
 The change notification event (``stplib.EventTopologyChange``) of the network topology is received and the learned MAC address and registered flow entry are initialized.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :pyobject: SimpleSwitch13.delete_flow
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
@@ -1038,6 +1076,8 @@ The change notification event (``stplib.EventTopologyChange``) of the network to
     :pyobject: SimpleSwitch13._topology_change_handler
 
 The change notification event (``stplib.EventPortStateChange``) of the port status is received and the debug log of the port status is output.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4

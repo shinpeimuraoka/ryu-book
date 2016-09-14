@@ -63,6 +63,8 @@ Ryuアプリケーションの実行
 
 ソース名： ``simple_switch_lacp_13.py``
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :lines: 16-
 
@@ -98,6 +100,8 @@ MininetのAPIを呼び出すスクリプトを作成し、必要なトポロジ�
 します。
 
 ソース名： ``link_aggregation.py``
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../sources/link_aggregation.py
 
@@ -815,6 +819,8 @@ LACPライブラリの実装
 前に行っておく必要があります。LACPライブラリでは、以下のメソッドでこの設定を
 行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :pyobject: LacpLib.add
@@ -854,6 +860,8 @@ Packet-In処理
 以外のパケットであればスイッチングハブの動作に委ねる」という処理を行い、
 スイッチングハブにはLACPデータユニットを見せないようにします。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :prepend: @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -872,6 +880,8 @@ ryu.base.app_manager.RyuAppクラスで定義されている、イベントを�
 ベントについて触れましたが、ユーザが独自にイベントを定義することもできます。
 上記ソースで送信している ``EventPacketIn`` というイベントは、LACPライブラ
 リ内で作成したユーザ定義イベントです。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :pyobject: EventPacketIn
@@ -901,6 +911,8 @@ LACPライブラリのLACPデータユニット受信処理は、以下の処理
 「 `LACPデータユニットの送受信処理`_ 」
 で、それぞれ説明します。ここでは1.の処理について説明します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :prepend: def _do_lacp(self, req_lacp, src, msg):
@@ -917,6 +929,8 @@ _get_slave_enabled()メソッドは、指定したスイッチの指定したポ
 上記のソースでは、無効状態のポートでLACPデータユニットを受信した場合、ポート
 の状態が変更されたということを示す ``EventSlaveStateChanged`` というユーザ
 定義イベントを送信しています。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :pyobject: EventSlaveStateChanged
@@ -947,6 +961,8 @@ LACPライブラリでは、LACPデータユニット受信時にPacket-Inさせ
 交換間隔が変更された場合、idle_timeoutの時間も再設定する必要があるため、
 LACPライブラリでは以下のような実装をしています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :prepend: def _do_lacp(self, req_lacp, src, msg):
@@ -967,6 +983,8 @@ _get_slave_timeout()メソッドは、指定したスイッチの指定したポ
 引数が異なるため、バージョンに応じたフローエントリ登録メソッドを取得していま
 す。以下はOpenFlow 1.2以降で使用するフローエントリ登録メソッドです。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :pyobject: LacpLib._add_flow_v1_2
@@ -982,6 +1000,8 @@ LACPデータユニットの送受信処理
 LACPデータユニット受信時、「 `ポートの有効/無効状態変更に伴う処理`_ 」や
 「 `LACPデータユニットをPacket-Inさせるフローエントリの登録`_ 」を行った
 後、応答用のLACPデータユニットを作成し、送信します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
@@ -1000,6 +1020,8 @@ LACPデータユニットには送信側（Actor）の情報と受信側（Partn
 が記載されているので、OpenFlowスイッチから応答を返すときにはそれを受信側情報
 として設定します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
     :prepend: @set_ev_cls(ofp_event.EventOFPFlowRemoved, MAIN_DISPATCHER)
@@ -1010,6 +1032,8 @@ FlowRemovedメッセージの受信処理
 
 指定された時間の間LACPデータユニットの交換が行われなかった場合、OpenFlowス
 イッチはFlowRemovedメッセージをOpenFlowコントローラに送信します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/lacplib.py
     :dedent: 4
@@ -1040,6 +1064,8 @@ ryu.base.app_manager.RyuAppを継承したRyuアプリケーションは、「_C
 ションを別スレッドで起動させることができます。ここではLACPライブラリの
 LacpLibクラスを「lacplib」という名前で「_CONTEXTS」に設定しています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :prepend: from ryu.lib import lacplib
               # ...
@@ -1049,6 +1075,8 @@ LacpLibクラスを「lacplib」という名前で「_CONTEXTS」に設定して
 
 「_CONTEXTS」に設定したアプリケーションは、__init__()メソッドのkwargsから
 インスタンスを取得することができます。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :dedent: 4
@@ -1073,6 +1101,8 @@ ports        [1, 2]                            グループ化するポートの
 この設定により、データパスID「0000000000000001」のOpenFlowスイッチのポート1と
 ポート2がひとつのリンク・アグリゲーション・グループとして動作します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :dedent: 4
     :prepend: def __init__(self, *args, **kwargs):
@@ -1089,6 +1119,8 @@ ports        [1, 2]                            グループ化するポートの
 るイベントハンドラと同じように ``ryu.controller.handler.set_ev_cls`` デコ
 レータで装飾します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :dedent: 4
     :prepend: @set_ev_cls(lacplib.EventPacketIn, MAIN_DISPATCHER)
@@ -1100,6 +1132,8 @@ ports        [1, 2]                            グループ化するポートの
 ``EventSlaveStateChanged`` イベントを送信しますので、こちらもイベントハンド
 ラを作成しておきます。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :dedent: 4
     :prepend: @set_ev_cls(lacplib.EventSlaveStateChanged, MAIN_DISPATCHER)
@@ -1110,6 +1144,8 @@ ports        [1, 2]                            グループ化するポートの
 過するパケットが実際に使用する物理インターフェースが変更になる可能性がありま
 す。そのため、登録されているフローエントリを全て削除
 しています。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_lacp_13.py
     :dedent: 4

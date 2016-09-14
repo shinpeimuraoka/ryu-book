@@ -124,6 +124,8 @@ IGMPスヌーピングの機能をOpenFlowを用いて実現した、RyuのIGMP�
 
 ソース名： ``simple_switch_igmp_13.py``
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :lines: 16-
 
@@ -1112,6 +1114,8 @@ IGMPスヌーピングライブラリの実装
 ライブラリの初期化時に、スヌーピングクラスと擬似クエリアクラスをインスタンス化
 します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpLib.__init__
@@ -1119,12 +1123,16 @@ IGMPスヌーピングライブラリの実装
 擬似クエリアインスタンスへの、クエリアとして動作するスイッチの設定とマルチキャ
 ストサーバの接続されているポートの設定は、ライブラリのメソッドで行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpLib.set_querier_mode
 
 擬似クエリアインスタンスにスイッチとポート番号が指定されている場合、指定された
 スイッチがアプリケーションと接続した際に擬似クエリア処理を開始します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1139,6 +1147,8 @@ Packet-In処理
 タンスに設定したスイッチである場合には擬似クエリアインスタンスに、それ以外の場
 合はスヌーピングインスタンスに、それぞれ処理を委ねます。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :prepend: @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -1147,12 +1157,16 @@ Packet-In処理
 スヌーピングインスタンスのPacket-In処理では、受信したIGMPパケットの種別に応じ
 て処理を行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpSnooper.packet_in_handler
 
 擬似クエリアインスタンスのPacket-In処理でも、受信したIGMPパケットの種別に応
 じて処理を行います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1174,6 +1188,8 @@ Packet-In処理
 をフラッディングした後、マルチキャストグループ参加ホストからの
 IGMP Report Message受信タイムアウト処理を行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpSnooper._do_query
@@ -1192,6 +1208,8 @@ IGMP Report Messageを受信した際、そのマルチキャストアドレス�
 
 当該マルチキャストグループのIGMP Report Messageをまだクエリアに転送していな
 ければ転送を行います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1213,9 +1231,13 @@ IGMP Report Messageを受信していなかった場合、当該マルチキャ�
 するホストがいなくなったものとみなし、マルチキャストグループ削除イベントの送信、
 フローエントリの削除、情報保持領域の更新を行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpSnooper._do_timeout_for_query
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1229,6 +1251,8 @@ IGMP Leave Messageを受信した際、情報保持領域に受信したメッ�
 確認用のIGMP Query Messageを受信したポートに向けて送信し、マルチキャストグ
 ループ参加ホストからのIGMP Report Message(Leave応答)受信タイムアウト処理を行
 います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1252,9 +1276,13 @@ IGMP Report Messageを受信していなかった場合、そのポートの先�
 フローエントリの削除、情報保持領域の更新を行います。このとき、保持している
 IGMP Leave Messageがあれば、クエリアに送信します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpSnooper._do_timeout_for_leave
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1266,6 +1294,8 @@ IGMP Leave Messageがあれば、クエリアに送信します。
 擬似クエリアインスタンスは、60秒に1回IGMP Query Messageをフラッディングしま
 す。フラッディング後、一定時間後にIGMP Report Message受信タイムアウト処理を開
 始します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1279,6 +1309,8 @@ IGMP Leave Messageがあれば、クエリアに送信します。
 スの転送先として受信ポートが記憶されていなければ、情報を記憶し、フローエントリ
 を登録します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
     :pyobject: IgmpQuerier._do_report
@@ -1290,6 +1322,8 @@ IGMP Query Message定期送信後、一定時間後にIGMP Report Message受信�
 ト処理を開始します。IGMP Report Messageが送信されなかったポートに対しては、
 擬似クエリアインスタンスは記憶した情報の更新とフローエントリ更新を行います。
 転送対象となるポートがなくなった場合、フローエントリの削除を行います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1304,6 +1338,8 @@ IGMP Query Message定期送信後、一定時間後にIGMP Report Message受信�
 擬似クエリアインスタンスは、マルチキャストグループ参加ホストからの
 IGMP Leave Messageを受信した際、記憶した情報の更新とフローエントリ更新を行い
 ます。転送対象となるポートがなくなった場合、フローエントリの削除を行います。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/igmplib.py
     :dedent: 4
@@ -1326,6 +1362,8 @@ ryu.base.app_manager.RyuAppを継承したRyuアプリケーションは、「_C
 ションを別スレッドで起動させることができます。ここではIGMPスヌーピングライブ
 ラリのIgmpLibクラスを「igmplib」という名前で「_CONTEXTS」に設定しています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :prepend: from ryu.lib import igmplib
               # ...
@@ -1335,6 +1373,8 @@ ryu.base.app_manager.RyuAppを継承したRyuアプリケーションは、「_C
 
 「_CONTEXTS」に設定したアプリケーションは、__init__()メソッドのkwargsから
 インスタンスを取得することができます。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :dedent: 4
@@ -1363,6 +1403,8 @@ server_port  2                                 マルチキャストサーバが
 として動作し、マルチキャストパケットの送信元としてポート2を想定したフローエン
 トリを登録するようになります。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :dedent: 4
     :prepend: def __init__(self, *args, **kwargs):
@@ -1379,6 +1421,8 @@ server_port  2                                 マルチキャストサーバが
 るイベントハンドラと同じように ``ryu.controller.handler.set_ev_cls`` デコ
 レータで装飾します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :dedent: 4
     :prepend: @set_ev_cls(igmplib.EventPacketIn, MAIN_DISPATCHER)
@@ -1389,6 +1433,8 @@ server_port  2                                 マルチキャストサーバが
 また、IGMPスヌーピングライブラリはマルチキャストグループの追加/変更/削除が行わ
 れると ``EventMulticastGroupStateChanged`` イベントを送信しますので、こちら
 もイベントハンドラを作成しておきます。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_igmp_13.py
     :dedent: 4

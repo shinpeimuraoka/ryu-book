@@ -183,7 +183,7 @@ These ports suppress frame transfer.</p>
 <p>Let&#8217;s execute the Ryu&#8217;s spanning tree application for which the spanning function is achieved using OpenFlow.</p>
 <p>This program is an application to which the spanning tree function has been added to the switching hub of &#8221; <a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a> .</p>
 <p>Source name: <code class="docutils literal"><span class="pre">simple_switch_stp_13.py</span></code></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
 <span class="kn">from</span> <span class="nn">ryu.controller</span> <span class="kn">import</span> <span class="n">ofp_event</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">set_ev_cls</span>
@@ -352,7 +352,7 @@ Installing ryu script to /usr/local/bin
 <p>For details on environment configuration and the login method, etc. to use VM images, refer to &#8221; <a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a> &#8221;.</p>
 <p>To operate using a special topology having a loop structure, as with &#8221; <a class="reference internal" href="link_aggregation.html#ch-link-aggregation"><span>Link Aggregation</span></a> &#8221;, using the topology configuration script, configure a mininet environment.</p>
 <p>Source name: <code class="docutils literal"><span class="pre">spanning_tree.py</span></code></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="ch">#!/usr/bin/env python</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">from</span> <span class="nn">mininet.cli</span> <span class="kn">import</span> <span class="n">CLI</span>
 <span class="kn">from</span> <span class="nn">mininet.net</span> <span class="kn">import</span> <span class="n">Mininet</span>
@@ -896,7 +896,7 @@ LEARN status</td>
 <div class="section" id="sending-bpdu-packet">
 <h4>Sending BPDU Packet<a class="headerlink" href="#sending-bpdu-packet" title="Permalink to this headline">¶</a></h4>
 <p>BPDU packets are sent by the BPDU packet send thread (<code class="docutils literal"><span class="pre">Port.send_bpdu_thread</span></code>) of the Port class. When the port role is the designated port (<code class="docutils literal"><span class="pre">DESIGNATED_PORT</span></code>), a BPDU packet is generated (<code class="docutils literal"><span class="pre">Port._generate_config_bpdu()</span></code>) at the hello time (<code class="docutils literal"><span class="pre">Port.port_times.hello_time</span></code>: by default, 2 seconds) notified by the root bridge and the BPDU packet is sent (<code class="docutils literal"><span class="pre">Port.ofctl.send_packet_out()</span></code>).</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dp</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">send_ev_func</span><span class="p">,</span> <span class="n">timeout_func</span><span class="p">,</span>
                  <span class="n">topology_change_func</span><span class="p">,</span> <span class="n">bridge_id</span><span class="p">,</span> <span class="n">bridge_times</span><span class="p">,</span> <span class="n">ofport</span><span class="p">):</span>
@@ -961,7 +961,7 @@ LEARN status</td>
                           <span class="bp">self</span><span class="o">.</span><span class="n">ofport</span><span class="o">.</span><span class="n">port_no</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dpid_str</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_transmit_bpdu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
@@ -994,7 +994,7 @@ LEARN status</td>
 </pre></div>
 </div>
 <p>BPDU packets to be sent are configured based on the port information (<code class="docutils literal"><span class="pre">Port.ofport</span></code>) collected when the controller is connected to OpenFlow switches or the root bridge information (<code class="docutils literal"><span class="pre">Port.port_priority,</span> <span class="pre">Port.port_times</span></code>) set in the received BPDU packets.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_generate_config_bpdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">):</span>
         <span class="n">src_mac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ofport</span><span class="o">.</span><span class="n">hw_addr</span>
@@ -1033,7 +1033,7 @@ LEARN status</td>
 <p>Reception of a BPDU packet is detected by the Packet-In event handler of the Stp class and is notified to the Port class instance via the Bridge class instance.
 For implementation of the event handler, refer to &#8220;<a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a>&#8221;.</p>
 <p>The port that receives a BPDU packet compares (<code class="docutils literal"><span class="pre">Stp.compare_bpdu_info()</span></code>) the bridge ID of previously received BPDU packets and the BPDU packet received this time to determine the need for STP re-calculation. If a superior BPDU (<code class="docutils literal"><span class="pre">SUPERIOR</span></code>) than the previously received BPDU is received, it means there is a change in the network topology such as &#8220;a new root bridge is added&#8221;, which is a a trigger for STP re-calculation.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">rcv_config_bpdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpdu_pkt</span><span class="p">):</span>
         <span class="c1"># Check received BPDU is superior to currently held BPDU.</span>
@@ -1097,7 +1097,7 @@ For implementation of the event handler, refer to &#8220;<a class="reference int
 <p>Timeout of BPDU packet receive waiting is detected by the BPDU packet receive waiting thread (<code class="docutils literal"><span class="pre">Port.wait_bpdu_thread</span></code>) of the Port class. When BPDU packets from the root bridge cannot be received for the maximum age (default: 20 seconds), an indirect failure is determined and is notified to the Bridge class instance.</p>
 <p>For update of the BPDU receive waiting timer and detection of timeout, <code class="docutils literal"><span class="pre">hub.Event</span></code> and <code class="docutils literal"><span class="pre">hub.Timeout</span></code> of the hub module (ryu.lib.hub) are used. <code class="docutils literal"><span class="pre">hub.Event</span></code> enters wait status by <code class="docutils literal"><span class="pre">hub.Event.wait()</span></code> and the thread is suspended until <code class="docutils literal"><span class="pre">hub.Event.set()</span></code> is executed. <code class="docutils literal"><span class="pre">hub.Timeout</span></code> issues an <code class="docutils literal"><span class="pre">hub.Timeout</span></code> exception if processing of the <code class="docutils literal"><span class="pre">try</span></code> clause is not completed within the specified timeout time.
 When <code class="docutils literal"><span class="pre">hub.Event</span></code> enters wait status and <code class="docutils literal"><span class="pre">hub.Event.set()</span></code> is not executed within the timeout time specified in <code class="docutils literal"><span class="pre">hub.Timeout</span></code>, timeout of BPDU packet receive waiting is determined and STP re-calculation processing of the Bridge class is called.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_wait_bpdu_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">time_exceed</span> <span class="o">=</span> <span class="bp">False</span>
@@ -1129,7 +1129,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
 </pre></div>
 </div>
 <p>When <code class="docutils literal"><span class="pre">SUPERIOR</span></code> or <code class="docutils literal"><span class="pre">REPEATED</span></code> is determined as a result of comparison processing (<code class="docutils literal"><span class="pre">Stp.compare_bpdu_info()</span></code>) of the received BPDU packet, it means that the BPDU packet from the root bridge can be received. Therefore, the BPDU receive waiting timer is updated (<code class="docutils literal"><span class="pre">Port._update_wait_bpdu_timer()</span></code>). By the <code class="docutils literal"><span class="pre">set()</span></code> processing of <code class="docutils literal"><span class="pre">Port.wait_timer_event</span></code>, which is a <code class="docutils literal"><span class="pre">hub.Event</span></code>, the <code class="docutils literal"><span class="pre">Port.wait_timer_event</span></code> is released from wait status and the BPDU packet receive waiting thread (<code class="docutils literal"><span class="pre">Port.wait_bpdu_thread</span></code>) cancels the timer without entering timeout processing of the <code class="docutils literal"><span class="pre">except</span> <span class="pre">hub.Timeout</span></code> clause and sets the timer again to start waiting for the next BPDU packet to be received.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">rcv_config_bpdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpdu_pkt</span><span class="p">):</span>
         <span class="c1"># Check received BPDU is superior to currently held BPDU.</span>
@@ -1185,7 +1185,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
         <span class="k">return</span> <span class="n">rcv_info</span><span class="p">,</span> <span class="n">rcv_tc</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_update_wait_bpdu_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait_timer_event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -1202,7 +1202,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
 <p>STP calculation (selection of the root bridge and selection of the role of each port) is executed by the Bridge class.</p>
 <p>In cases where STP calculation is executed, a change in the network topology has occurred and it is possible for packets to be looped. Therefore, by setting all ports to BLOCK state (<code class="docutils literal"><span class="pre">port.down</span></code>) and also notifying the topology change event (<code class="docutils literal"><span class="pre">EventTopologyChange</span></code>) to high order APL, initialization of already learned MAC address information is promoted.</p>
 <p>After that, the root bridge and the role of ports are selected by <code class="docutils literal"><span class="pre">Bridge._spanning_tree_algorithm()</span></code>, and each port is started in LISTEN status (<code class="docutils literal"><span class="pre">port.up</span></code>) to start port status change.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Bridge</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Bridge</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">recalculate_spanning_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Re-calculation of spanning tree. &quot;&quot;&quot;</span>
@@ -1239,7 +1239,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
 <p>To select the root bridge, own bridge information such as bridge ID, etc. is compared with other bridge&#8217;s information set in the BPDU packet received by each port (<code class="docutils literal"><span class="pre">Bridge._select_root_port</span></code>).</p>
 <p>As a result, when the root port is found (the other bridge&#8217;s information received by the port is superior to that of the own bridge), the other bridge is determined to be the root bridge and the designated ports (<code class="docutils literal"><span class="pre">Bridge._select_designated_port</span></code>) and non-designated ports are selected (ports other than the root port/designated ports are selected as non-designated ports).</p>
 <p>On the other hand, if the root port is not found (own bridge information is the most superior), the own bridge is determined to be the root bridge and all other ports are designated ports.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Bridge</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Bridge</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_spanning_tree_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Update tree roles.</span>
@@ -1285,7 +1285,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
 <div class="section" id="port-status-change">
 <h4>Port Status Change<a class="headerlink" href="#port-status-change" title="Permalink to this headline">¶</a></h4>
 <p>Status change processing of ports is executed by the status change control thread (<code class="docutils literal"><span class="pre">Port.state_machine</span></code>) of the Port class. It uses <code class="docutils literal"><span class="pre">Port._get_timer()</span></code> to get the timer to change to the next status and after the timer elapses, uses <code class="docutils literal"><span class="pre">Port._get_next_state()</span></code> to get the next status to change the status. Also, the status is changed when <code class="docutils literal"><span class="pre">Port._change_status()</span></code> is executed in case that when STP re-calculation occurs and the status is changed to BLOCK status, regardless of the previous port status. This processing is achieved using <code class="docutils literal"><span class="pre">hub.Event</span></code> and <code class="docutils literal"><span class="pre">hub.Timeout</span></code> of the hub module, as with &#8220;<a class="reference internal" href="#detecting-failures">Detecting Failures</a>&#8221;.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_state_machine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Port state machine.</span>
@@ -1328,7 +1328,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
             <span class="bp">self</span><span class="o">.</span><span class="n">state_event</span> <span class="o">=</span> <span class="bp">None</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_get_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">timer</span> <span class="o">=</span> <span class="p">{</span><span class="n">PORT_STATE_DISABLE</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
@@ -1339,7 +1339,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
         <span class="k">return</span> <span class="n">timer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Port</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="k">def</span> <span class="nf">_get_next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">next_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">PORT_STATE_DISABLE</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
@@ -1361,7 +1361,7 @@ When <code class="docutils literal"><span class="pre">hub.Event</span></code> en
 <div class="section" id="setting-contexts">
 <h4>Setting &#8220;_CONTEXTS&#8221;<a class="headerlink" href="#setting-contexts" title="Permalink to this headline">¶</a></h4>
 <p>As with &#8221; <a class="reference internal" href="link_aggregation.html#ch-link-aggregation"><span>Link Aggregation</span></a> &#8221;, register CONTEXT to use the STP library.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.lib</span> <span class="kn">import</span> <span class="n">stplib</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.lib</span> <span class="kn">import</span> <span class="n">stplib</span>
 <span class="c1"># ...</span>
 <span class="k">class</span> <span class="nc">SimpleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
     <span class="n">OFP_VERSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ofproto_v1_3</span><span class="o">.</span><span class="n">OFP_VERSION</span><span class="p">]</span>
@@ -1402,7 +1402,7 @@ Here, the following values are set as a sample.</p>
 </tbody>
 </table>
 <p>Using these settings, the bridge ID of the dpid=0000000000000001 OpenFlow switch is always the smallest value and is selected as the root bridge.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">SimpleSwitch13</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mac_to_port</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stp</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stplib&#39;</span><span class="p">]</span>
@@ -1423,7 +1423,7 @@ Here, the following values are set as a sample.</p>
 <h4>STP Event Processing<a class="headerlink" href="#stp-event-processing" title="Permalink to this headline">¶</a></h4>
 <p>As with &#8221; <a class="reference internal" href="link_aggregation.html#ch-link-aggregation"><span>Link Aggregation</span></a> &#8221;, prepare the event handler to receive events notified by the STP library.</p>
 <p>By using the <code class="docutils literal"><span class="pre">stplib.EventPacketIn</span></code> event defined in the STP library, it is possible to receive packets other than BPDU packets; therefore, the same packet handling is performed as &#8221; <a class="reference internal" href="switching_hub.html#ch-switching-hub"><span>Switching Hub</span></a> &#8221;.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">datapath</span>
@@ -1435,7 +1435,7 @@ Here, the following values are set as a sample.</p>
 </pre></div>
 </div>
 <p>The change notification event (<code class="docutils literal"><span class="pre">stplib.EventTopologyChange</span></code>) of the network topology is received and the learned MAC address and registered flow entry are initialized.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">delete_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">delete_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
 
@@ -1448,7 +1448,7 @@ Here, the following values are set as a sample.</p>
         <span class="n">datapath</span><span class="o">.</span><span class="n">send_msg</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventTopologyChange</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventTopologyChange</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_topology_change_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">dp</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">dp</span>
     <span class="n">dpid_str</span> <span class="o">=</span> <span class="n">dpid_lib</span><span class="o">.</span><span class="n">dpid_to_str</span><span class="p">(</span><span class="n">dp</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -1461,7 +1461,7 @@ Here, the following values are set as a sample.</p>
 </pre></div>
 </div>
 <p>The change notification event (<code class="docutils literal"><span class="pre">stplib.EventPortStateChange</span></code>) of the port status is received and the debug log of the port status is output.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventPortStateChange</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">stplib</span><span class="o">.</span><span class="n">EventPortStateChange</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_port_state_change_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">dpid_str</span> <span class="o">=</span> <span class="n">dpid_lib</span><span class="o">.</span><span class="n">dpid_to_str</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">dp</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
     <span class="n">of_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">stplib</span><span class="o">.</span><span class="n">PORT_STATE_DISABLE</span><span class="p">:</span> <span class="s1">&#39;DISABLE&#39;</span><span class="p">,</span>

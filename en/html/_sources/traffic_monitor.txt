@@ -22,6 +22,8 @@ Implementation of Traffic Monitor
 
 The following is source code in which a traffic monitoring function has been added to the switching hub explained in " :ref:`ch_switching_hub` ".
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :lines: 16-
 
@@ -33,6 +35,8 @@ Fixed-Cycle Processing
 
 In parallel with switching hub processing, create a thread to periodically issue a request to the OpenFlow switch to acquire statistical information.
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :pyobject: SimpleMonitor13
     :end-before: set_ev_cls
@@ -40,6 +44,8 @@ In parallel with switching hub processing, create a thread to periodically issue
 
 There are some eventlet wrappers and basic class implementation in ``ryu.lib.hub``. Here, we use ``hub.spawn()``, which creates threads.
 The thread actually created is an eventlet green thread.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -54,6 +60,8 @@ In thread function ``_monitor()``, issuance of a statistical information acquisi
 In order to make sure the connected switch is monitored, ``EventOFPStateChange`` event is used for detecting connection and disconnection. This event is issued by the Ryu framework and is issued when the Datapath state is changed.
 
 Here, when the Datapath state becomes ``MAIN_DISPATCHER``, that switch is registered as the monitor target and when it becomes ``DEAD_DISPATCHER``, the registration is deleted.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -71,6 +79,8 @@ It is possible to specify the desired port number to acquire information from. H
 FlowStats
 ^^^^^^^^^
 In order to receive a response from the switch, create an event handler that receives the FlowStatsReply message.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -211,6 +221,8 @@ PortStats
 ^^^^^^^^^
 
 In order to receive a response from the switch, create an event handler that receives the PortStatsReply message.
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4

@@ -250,6 +250,8 @@ VMイメージ利用のための環境設定やログイン方法等は「 :ref:
 
 ソース名： ``spanning_tree.py``
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../sources/spanning_tree.py
 
 
@@ -931,10 +933,14 @@ BPDUパケット送信はPortクラスのBPDUパケット送信スレッド
 ( ``Port._generate_config_bpdu()`` )およびBPDUパケット送信
 ( ``Port.ofctl.send_packet_out()`` )を行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port.__init__
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -945,6 +951,8 @@ BPDUパケット送信はPortクラスのBPDUパケット送信スレッド
 ポート情報( ``Port.ofport`` )や受信したBPDUパケットに設定された
 ルートブリッジ情報( ``Port.port_priority、Port.port_times`` )などを元に
 構築されます。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -963,6 +971,8 @@ BPDUパケットのブリッジIDなどの比較( ``Stp.compare_bpdu_info()`` )�
 STP再計算の要否判定を行います。以前に受信したBPDUより優れたBPDU( ``SUPERIOR`` )
 を受信した場合、「新たなルートブリッジが追加された」などのネットワーク
 トポロジ変更が発生したことを意味するため、STP再計算の契機となります。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -992,6 +1002,8 @@ BPDU受信待ちタイマーの更新とタイムアウトの検出にはhubモ�
 ``hub.Event.set()`` が実行されない場合に、BPDUパケットの受信待ちタイムアウト
 と判断しBridgeクラスのSTP再計算処理を呼び出します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
@@ -1007,10 +1019,14 @@ BPDUパケットが受信出来ていることを意味するため、BPDU受信
 キャンセルし、改めてタイマーをセットし直すことで次のBPDUパケットの受信待ち
 を開始します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port.rcv_config_bpdu
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -1031,6 +1047,7 @@ STP計算が実行されるケースではネットワークトポロジの変�
 役割を選択した上で、各ポートをLISTEN状態で起動( ``port.up`` )しポートの
 状態遷移を開始します。
 
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Bridge(object):
@@ -1049,6 +1066,8 @@ STP計算が実行されるケースではネットワークトポロジの変�
 一方、ルートポートが見つからなかった場合(自身のブリッジ情報が最も優れていた場合)は
 自身をルートブリッジと判断し各ポートは全て指定ポートとなります。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Bridge(object):
               # ...
@@ -1065,15 +1084,21 @@ BLOCK状態に遷移させるケースなど、 ``Port._change_status()`` が実
 にも状態遷移が行われます。これらの処理は「 `故障検出`_ 」と同様に
 hubモジュールの ``hub.Event`` と ``hub.Timeout`` を用いて実現しています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port._state_machine
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
               # ...
     :pyobject: Port._get_timer
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/lib/stplib.py
     :prepend: class Port(object):
@@ -1093,6 +1118,8 @@ hubモジュールの ``hub.Event`` と ``hub.Timeout`` を用いて実現して
 
 「 :ref:`ch_link_aggregation` 」と同様にSTPライブラリを利用するため
 CONTEXTを登録します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :prepend: from ryu.lib import stplib
@@ -1117,6 +1144,8 @@ dpid=0000000000000003 bridge.priority 0xa000
 この設定によりdpid=0000000000000001のOpenFlowスイッチのブリッジIDが
 常に最小の値となり、ルートブリッジに選択されることになります。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :pyobject: SimpleSwitch13.__init__
@@ -1133,6 +1162,8 @@ STPライブラリで定義された ``stplib.EventPacketIn`` イベントを利
 BPDUパケットを除いたパケットを受信することが出来るため、
 「 :ref:`ch_switching_hub` 」と同様のパケットハンドリンクを行います。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :prepend: @set_ev_cls(stplib.EventPacketIn, MAIN_DISPATCHER)
@@ -1143,9 +1174,13 @@ BPDUパケットを除いたパケットを受信することが出来るため�
 ネットワークトポロジの変更通知イベント( ``stplib.EventTopologyChange`` )を
 受け取り、学習したMACアドレスおよび登録済みのフローエントリを初期化しています。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
     :pyobject: SimpleSwitch13.delete_flow
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4
@@ -1154,6 +1189,8 @@ BPDUパケットを除いたパケットを受信することが出来るため�
 
 ポート状態の変更通知イベント( ``stplib.EventPortStateChange`` )を受け取り、
 ポート状態のデバッグログ出力を行っています。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_switch_stp_13.py
     :dedent: 4

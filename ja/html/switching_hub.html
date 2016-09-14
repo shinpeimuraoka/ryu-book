@@ -145,7 +145,7 @@ eth-src: ホストA
 <div>ryu/app/example_switch_13.py</div></blockquote>
 <p>OpenFlowのバージョンに応じて、他にもsimple_switch.py(OpenFlow 1.0)、simple_switch_12.py(OpenFlow 1.2)がありますが、ここではOpenFlow 1.3に対応した実装を見ていきます。</p>
 <p>短いソースコードなので、全体をここに掲載します。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">ryu.base</span> <span class="kn">import</span> <span class="n">app_manager</span>
 <span class="kn">from</span> <span class="nn">ryu.controller</span> <span class="kn">import</span> <span class="n">ofp_event</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span>
 <span class="kn">from</span> <span class="nn">ryu.controller.handler</span> <span class="kn">import</span> <span class="n">set_ev_cls</span>
@@ -239,7 +239,7 @@ eth-src: ホストA
 <p>Ryuアプリケーションとして実装するため、ryu.base.app_manager.RyuAppを継承します。また、OpenFlow 1.3を使用するため、<code class="docutils literal"><span class="pre">OFP_VERSIONS</span></code>にOpenFlow 1.3のバージョンを指定しています。</p>
 <p>また、MACアドレステーブル mac_to_port を定義しています。</p>
 <p>OpenFlowプロトコルでは、OpenFlowスイッチとコントローラが通信を行うために必要となるハンドシェイクなどのいくつかの手順が決められていますが、Ryuのフレームワークが処理してくれるため、Ryuアプリケーションでは意識する必要はありません。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleSwitch13</span><span class="p">(</span><span class="n">app_manager</span><span class="o">.</span><span class="n">RyuApp</span><span class="p">):</span>
     <span class="n">OFP_VERSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ofproto_v1_3</span><span class="o">.</span><span class="n">OFP_VERSION</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -286,7 +286,7 @@ eth-src: ホストA
 <h4>Table-missフローエントリの追加<a class="headerlink" href="#table-miss" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>OpenFlowスイッチとのハンドシェイク完了後にTable-missフローエントリをフローテーブルに追加し、Packet-Inメッセージを受信する準備を行います。</p>
 <p>具体的には、Switch Features(Features Reply)メッセージを受け取り、そこでTable-missフローエントリの追加を行います。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPSwitchFeatures</span><span class="p">,</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">)</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPSwitchFeatures</span><span class="p">,</span> <span class="n">CONFIG_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">datapath</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
@@ -330,7 +330,7 @@ eth-src: ホストA
 <blockquote>
 <div>OpenFlowメッセージを送信します。msgは、送信OpenFlowメッセージに対応した<code class="docutils literal"><span class="pre">ryu.ofproto.ofproto_parser.MsgBase</span></code>のサブクラスです。</div></blockquote>
 <p>スイッチングハブでは、受信したSwitch Featuresメッセージ自体は特に使いません。Table-missフローエントリを追加するタイミングを得るためのイベントとして扱っています。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">switch_features_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
 <span class="c1"># ...</span>
 
     <span class="c1"># install the table-miss flow entry.</span>
@@ -352,7 +352,7 @@ eth-src: ホストA
 <div class="section" id="packet-in">
 <h4>Packet-inメッセージ<a class="headerlink" href="#packet-in" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>未知の宛先の受信パケットを受け付けるため、Packet-Inイベントのハンドラを作成します。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="nd">@set_ev_cls</span><span class="p">(</span><span class="n">ofp_event</span><span class="o">.</span><span class="n">EventOFPPacketIn</span><span class="p">,</span> <span class="n">MAIN_DISPATCHER</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">msg</span>
     <span class="n">datapath</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">datapath</span>
@@ -391,7 +391,7 @@ eth-src: ホストA
 </div>
 <div class="section" id="mac">
 <h4>MACアドレステーブルの更新<a class="headerlink" href="#mac" title="このヘッドラインへのパーマリンク">¶</a></h4>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
 <span class="c1"># ...</span>
 
     <span class="c1"># get the received port number from packet_in message.</span>
@@ -412,7 +412,7 @@ eth-src: ホストA
 <div class="section" id="id5">
 <h4>転送先ポートの判定<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>宛先MACアドレスが、MACアドレステーブルに存在する場合は対応するポート番号を、見つからなかった場合はフラッディング(<code class="docutils literal"><span class="pre">OFPP_FLOOD</span></code>)を出力ポートに指定したOUTPUTアクションクラスのインスタンスを生成します。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
 <span class="c1"># ...</span>
 
     <span class="c1"># if the destination mac address is already learned,</span>
@@ -448,7 +448,7 @@ eth-src: ホストA
 <div class="section" id="id6">
 <h4>フローエントリの追加処理<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>Packet-Inハンドラの処理がまだ終わっていませんが、ここで一旦フローエントリを追加するメソッドの方を見ていきます。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
     <span class="n">ofproto</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">ofproto_parser</span>
 
@@ -461,7 +461,7 @@ eth-src: ホストA
 <p>フローエントリには、対象となるパケットの条件を示すマッチと、そのパケットに対する操作を示すインストラクション、エントリの優先度、有効時間などを設定します。</p>
 <p>スイッチングハブの実装では、インストラクションにApply Actionsを使用して、指定したアクションを直ちに適用するように設定しています。</p>
 <p>最後に、Flow Modメッセージを発行してフローテーブルにエントリを追加します。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
 <span class="c1"># ...</span>
     <span class="n">mod</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">OFPFlowMod</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">datapath</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span>
                             <span class="n">match</span><span class="o">=</span><span class="n">match</span><span class="p">,</span> <span class="n">instructions</span><span class="o">=</span><span class="n">inst</span><span class="p">)</span>
@@ -585,7 +585,7 @@ eth-src: ホストA
 <h4>パケットの転送<a class="headerlink" href="#id7" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>Packet-Inハンドラに戻り、最後の処理の説明です。</p>
 <p>宛先MACアドレスがMACアドレステーブルから見つかったかどうかに関わらず、最終的にはPacket-Outメッセージを発行して、受信パケットを転送します。</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+<div class="sourcecode highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_packet_in_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
 <span class="c1"># ...</span>
 
     <span class="c1"># construct packet_out message and send it.</span>

@@ -34,6 +34,8 @@
 早速ですが、「 :ref:`ch_switching_hub` 」で説明したスイッチングハブにトラフィック
 モニター機能を追加したソースコードです。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :lines: 16-
 
@@ -47,6 +49,8 @@ SimpleSwitch13を継承したSimpleMonitor13クラスに、トラフィックモ
 スイッチングハブの処理と並行して、定期的に統計情報取得のリクエストをOpenFlow
 スイッチへ発行するために、スレッドを生成します。
 
+.. rst-class:: sourcecode
+
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :pyobject: SimpleMonitor13
     :end-before: set_ev_cls
@@ -55,6 +59,8 @@ SimpleSwitch13を継承したSimpleMonitor13クラスに、トラフィックモ
 ``ryu.lib.hub`` には、いくつかのeventletのラッパーや基本的なクラスの実装
 があります。ここではスレッドを生成する ``hub.spawn()`` を使用します。
 実際に生成されるスレッドはeventletのグリーンスレッドです。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -73,6 +79,8 @@ SimpleSwitch13を継承したSimpleMonitor13クラスに、トラフィックモ
 
 ここでは、Datapathのステートが ``MAIN_DISPATCHER`` になった時にそのスイッチ
 を監視対象に登録、 ``DEAD_DISPATCHER`` になった時に登録の削除を行っています。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -93,6 +101,8 @@ SimpleSwitch13を継承したSimpleMonitor13クラスに、トラフィックモ
 FlowStats
 ^^^^^^^^^
 スイッチからの応答を受け取るため、FlowStatsReplyメッセージを受信するイベントハンドラを作成します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
@@ -238,6 +248,8 @@ PortStats
 ^^^^^^^^^
 
 スイッチからの応答を受け取るため、PortStatsReplyメッセージを受信するイベントハンドラを作成します。
+
+.. rst-class:: sourcecode
 
 .. literalinclude:: ../../ryu/app/simple_monitor_13.py
     :dedent: 4
