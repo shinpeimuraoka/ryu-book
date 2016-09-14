@@ -1,0 +1,2012 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>QoS &#8212; Ryubook 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="top" title="Ryubook 1.0 documentation" href="index.html" />
+    <link rel="next" title="OpenFlow 스위치 테스트 도구" href="switch_test_tool.html" />
+    <link rel="prev" title="라우터" href="rest_router.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="전체 색인"
+             accesskey="I">색인</a></li>
+        <li class="right" >
+          <a href="switch_test_tool.html" title="OpenFlow 스위치 테스트 도구"
+             accesskey="N">다음</a> |</li>
+        <li class="right" >
+          <a href="rest_router.html" title="라우터"
+             accesskey="P">이전</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ryubook 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="qos">
+<span id="ch-rest-qos"></span><h1>QoS<a class="headerlink" href="#qos" title="제목 주소">¶</a></h1>
+<p>이 장에서는 REST에서 설정이 가능한
+QoS 기능의 사용 방법에 대해
+설명합니다.</p>
+<div class="section" id="id1">
+<h2>QoS에 대해<a class="headerlink" href="#id1" title="제목 주소">¶</a></h2>
+<p>QoS (Quality of Service)는 네트워크에서 데이터의 종류에 따른 우선 순위에 따라 데이터를 전송하거나
+특정 통신을 위한 네트워크 대역폭을 예약하고 일정한 속도로 통신 할 수 있도록 하는 기술입니다.
+OpenFlow는 대역폭 제어에 의한 QoS가 가능합니다.</p>
+</div>
+<div class="section" id="id2">
+<h2>플로우 기반 QoS의 동작 예<a class="headerlink" href="#id2" title="제목 주소">¶</a></h2>
+<p>다음과 같은 토폴로지를 가정하고 스위치 Queue 설정 및 규칙을 추가하고 적절한 대역폭을 할당하는 예를 소개합니다.
+또한 OFS1의 WAN 측 인터페이스에서 트래픽 쉐이핑을 할 경우를 고려하고 있습니다.</p>
+<a class="reference internal image-reference" href="_images/fig15.png"><img alt="_images/fig15.png" class="align-center" src="_images/fig15.png" style="width: 280.0px; height: 85.6px;" /></a>
+<div class="section" id="id3">
+<h3>환경 구축<a class="headerlink" href="#id3" title="제목 주소">¶</a></h3>
+<p>우선 Mininet에 환경을 구축합니다. <code class="docutils literal"><span class="pre">mn</span></code> 명령의 매개 변수는 다음과
+같습니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="15%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">매개 변수</th>
+<th class="head">값</th>
+<th class="head">설명</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mac</td>
+<td>없음</td>
+<td>자동으로 호스트의 MAC 주소를 설정함</td>
+</tr>
+<tr class="row-odd"><td>switch</td>
+<td>ovsk</td>
+<td>Open vSwitch를 사용</td>
+</tr>
+<tr class="row-even"><td>controller</td>
+<td>remote</td>
+<td>(별도의) 외부 OpenFlow 컨트롤러 사용</td>
+</tr>
+<tr class="row-odd"><td>x</td>
+<td>없음</td>
+<td>xterm을 시작</td>
+</tr>
+</tbody>
+</table>
+<p>실행 예는 다음과 같습니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span>ryu@ryu-vm:~$ sudo mn --mac --switch ovsk --controller remote -x
+*** Creating network
+*** Adding controller
+Unable to contact the remote controller at 127.0.0.1:6633
+*** Adding hosts:
+h1 h2
+*** Adding switches:
+s1
+*** Adding links:
+(h1, s1) (h2, s1)
+*** Configuring hosts
+h1 h2
+*** Running terms on localhost:10.0
+*** Starting controller
+*** Starting 1 switches
+s1
+*** Starting CLI:
+mininet&gt;
+</pre></div>
+</div>
+<p>또한 컨트롤러의 xterm을 다시 시작해야합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">c0</span>
+<span class="n">mininet</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>다음으로, 스위치에서 사용하는 OpenFlow 버전을 1.3으로 설정합니다.
+또한 OVSDB에 액세스를 하기 위해 6632 포트로 수신하도록 설정합니다.</p>
+<p>switch: s1 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ovs-vsctl set-manager ptcp:6632</span>
+</pre></div>
+</div>
+<p>이어 「 <a class="reference internal" href="switching_hub.html#ch-switching-hub"><span class="std std-ref">스위칭 허브</span></a> 」에서 사용했던 simple_switch_13.py 파일을 수정합니다. rest_qos.py 플로우  테이블의 파이프 라인에서 처리되는 것을 고려하고 있기 때문에 simple_switch_13.py의 플로우 항목을 table id:1에 등록하도록 변경합니다.</p>
+<p>controller: c0 (root)</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># cd ryu/; python ./setup.py install</span>
+</pre></div>
+</div>
+<p>마지막으로, 컨트롤러 xterm에서 rest_qos, qos_simple_switch_13, rest_conf_switch를 시작합니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@mininet</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~/</span><span class="n">ryu</span><span class="c1"># ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13 ryu.app.rest_conf_switch</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_simple_switch_13</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_conf_switch</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">DPSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">dpset</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">ConfSwitchSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">conf_switch</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">wsgi</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_conf_switch</span> <span class="n">of</span> <span class="n">ConfSwitchAPI</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_simple_switch_13</span> <span class="n">of</span> <span class="n">SimpleSwitch13</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span> <span class="n">of</span> <span class="n">OFPHandler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span> <span class="n">of</span> <span class="n">RestQoSAPI</span>
+<span class="p">(</span><span class="mi">3519</span><span class="p">)</span> <span class="n">wsgi</span> <span class="n">starting</span> <span class="n">up</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>Ryu와 스위치 사이에 연결이 성공하면 다음 메시지가 표시됩니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>위 로그가 표시되면 준비 완료입니다.</p>
+</div>
+<div class="section" id="queue">
+<h3>Queue 설정<a class="headerlink" href="#queue" title="제목 주소">¶</a></h3>
+<p>스위치 Queue를 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="36%" />
+<col width="36%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">큐 ID</th>
+<th class="head">최대 속도</th>
+<th class="head">최소 속도</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0</td>
+<td>500Kbps</td>
+<td>-</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>(1Mbps)</td>
+<td>800Kbps</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">이후의 설명에서 사용하는 REST API의 자세한 내용은 장 끝 부분의 「 <a class="reference internal" href="#rest-api">REST API 목록</a> 」을 참조하십시오.</p>
+</div>
+<p>우선, OVSDB에 액세스하기 위한 설정을 합니다.</p>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>다음으로, Queue를 설정합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;: [{&quot;max_rate&quot;: &quot;500000&quot;}, {&quot;min_rate&quot;: &quot;800000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s2">&quot;max-rate&quot;</span><span class="p">:</span> <span class="s2">&quot;500000&quot;</span>
+            <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s2">&quot;min-rate&quot;</span><span class="p">:</span> <span class="s2">&quot;800000&quot;</span>
+            <span class="p">}</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">REST 명령의 실행 결과는 보기 쉽도록 포맷화하였습니다.</p>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>QoS 설정<a class="headerlink" href="#id4" title="제목 주소">¶</a></h3>
+<p>다음과 같이 스위치에 플로우를 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="18%" />
+<col width="18%" />
+<col width="16%" />
+<col width="12%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">(우선 순위)</th>
+<th class="head">대상</th>
+<th class="head">대상 포트</th>
+<th class="head">프로토콜</th>
+<th class="head">Queue ID</th>
+<th class="head">(QoS ID)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>10.0.0.1</td>
+<td>5002</td>
+<td>UDP</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;10.0.0.1&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>설정 내용 확인<a class="headerlink" href="#id5" title="제목 주소">¶</a></h3>
+<p>각 스위치에 설정된 내용을 확인합니다.</p>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;nw_proto&quot;</span><span class="p">:</span> <span class="s2">&quot;UDP&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;tp_dst&quot;</span><span class="p">:</span> <span class="mi">5002</span><span class="p">,</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;nw_dst&quot;</span><span class="p">:</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>대역폭 측정<a class="headerlink" href="#id6" title="제목 주소">¶</a></h3>
+<p>이 상태에서 iperf 대역 측정을 해 봅니다.
+h1 서버에서는 UDP 프로토콜로 5001 포트와 5002 포트에서 수신 대기합니다. h2는 클라이언트로, h1의 5001 포트에 1Mbps의 UDP 트래픽 및 h1의 5002 포트에 1Mbps의 UDP 트래픽을 전달합니다.</p>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">다음 예제에서는 대역 측정에 iperf
+(<a class="reference external" href="http://iperf.fr/">http://iperf.fr/</a>)를 사용합니다. iperf 설치 및
+사용 방법은 이 글에서는 설명하지 않습니다.</p>
+</div>
+<p>먼저 h1, h2 터미널을 하나씩 시작합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h1</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h2</span>
+</pre></div>
+</div>
+<p>Node: h1(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -i 1 -p 5001</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h1(2) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -i 1 -p 5002</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h2(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5001 -u -b 1M</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h2(2) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5002 -u -b 1M</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h1(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5001</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.2</span> <span class="n">port</span> <span class="mi">50375</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>        <span class="n">Jitter</span>   <span class="n">Lost</span><span class="o">/</span><span class="n">Total</span> <span class="n">Datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span> <span class="mf">1.0</span> <span class="n">sec</span>  <span class="mf">60.3</span> <span class="n">KBytes</span>   <span class="mi">494</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.208</span> <span class="n">ms</span>    <span class="mi">4</span><span class="o">/</span>   <span class="mi">42</span> <span class="p">(</span><span class="mf">9.5</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span> <span class="mf">1.0</span> <span class="n">sec</span>  <span class="mi">4</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">1.0</span><span class="o">-</span> <span class="mf">2.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.538</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">2.0</span><span class="o">-</span> <span class="mf">3.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.494</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">3.0</span><span class="o">-</span> <span class="mf">4.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.625</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">4.0</span><span class="o">-</span> <span class="mf">5.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.576</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">5.0</span><span class="o">-</span> <span class="mf">6.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.561</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">6.0</span><span class="o">-</span> <span class="mf">7.0</span> <span class="n">sec</span>  <span class="mf">11.5</span> <span class="n">KBytes</span>  <span class="mf">94.1</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">45.536</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">8</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">7.0</span><span class="o">-</span> <span class="mf">8.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">92.790</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">8.0</span><span class="o">-</span> <span class="mf">9.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">135.391</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">9.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">167.045</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">10.0</span><span class="o">-</span><span class="mf">11.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">193.006</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">11.0</span><span class="o">-</span><span class="mf">12.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">213.944</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">12.0</span><span class="o">-</span><span class="mf">13.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">231.981</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">13.0</span><span class="o">-</span><span class="mf">14.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">249.758</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">14.0</span><span class="o">-</span><span class="mf">15.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">261.139</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">15.0</span><span class="o">-</span><span class="mf">16.0</span> <span class="n">sec</span>  <span class="mf">4.31</span> <span class="n">KBytes</span>  <span class="mf">35.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">269.879</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">3</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">16.0</span><span class="o">-</span><span class="mf">17.0</span> <span class="n">sec</span>  <span class="mf">12.9</span> <span class="n">KBytes</span>   <span class="mi">106</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">204.755</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">9</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">17.0</span><span class="o">-</span><span class="mf">18.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">26.214</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">18.0</span><span class="o">-</span><span class="mf">19.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">13.485</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">19.0</span><span class="o">-</span><span class="mf">20.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.690</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">20.0</span><span class="o">-</span><span class="mf">21.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.498</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">21.0</span><span class="o">-</span><span class="mf">22.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.601</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">22.0</span><span class="o">-</span><span class="mf">23.0</span> <span class="n">sec</span>  <span class="mf">60.3</span> <span class="n">KBytes</span>   <span class="mi">494</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.640</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">42</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">23.0</span><span class="o">-</span><span class="mf">24.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.508</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">24.0</span><span class="o">-</span><span class="mf">25.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.578</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">25.0</span><span class="o">-</span><span class="mf">26.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.541</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">26.0</span><span class="o">-</span><span class="mf">27.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.539</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">27.0</span><span class="o">-</span><span class="mf">28.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.578</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">28.0</span><span class="o">-</span><span class="mf">29.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.527</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">29.0</span><span class="o">-</span><span class="mf">30.0</span> <span class="n">sec</span>  <span class="mf">58.9</span> <span class="n">KBytes</span>   <span class="mi">482</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.542</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">41</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">30.6</span> <span class="n">sec</span>  <span class="mf">1.19</span> <span class="n">MBytes</span>   <span class="mi">327</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.562</span> <span class="n">ms</span>    <span class="mi">4</span><span class="o">/</span>  <span class="mi">852</span> <span class="p">(</span><span class="mf">0.47</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">30.6</span> <span class="n">sec</span>  <span class="mi">4</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+</pre></div>
+</div>
+<p>Node: h1(2) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5002</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.2</span> <span class="n">port</span> <span class="mi">60868</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>        <span class="n">Jitter</span>   <span class="n">Lost</span><span class="o">/</span><span class="n">Total</span> <span class="n">Datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span> <span class="mf">1.0</span> <span class="n">sec</span>   <span class="mi">112</span> <span class="n">KBytes</span>   <span class="mi">917</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.288</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">78</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">1.0</span><span class="o">-</span> <span class="mf">2.0</span> <span class="n">sec</span>   <span class="mi">115</span> <span class="n">KBytes</span>   <span class="mi">941</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.168</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">80</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">2.0</span><span class="o">-</span> <span class="mf">3.0</span> <span class="n">sec</span>   <span class="mi">115</span> <span class="n">KBytes</span>   <span class="mi">941</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.454</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">80</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">3.0</span><span class="o">-</span> <span class="mf">4.0</span> <span class="n">sec</span>   <span class="mi">113</span> <span class="n">KBytes</span>   <span class="mi">929</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.226</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">79</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">4.0</span><span class="o">-</span> <span class="mf">5.0</span> <span class="n">sec</span>   <span class="mi">113</span> <span class="n">KBytes</span>   <span class="mi">929</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.096</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">79</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">5.0</span><span class="o">-</span> <span class="mf">6.0</span> <span class="n">sec</span>   <span class="mi">113</span> <span class="n">KBytes</span>   <span class="mi">929</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.225</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">79</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">6.0</span><span class="o">-</span> <span class="mf">7.0</span> <span class="n">sec</span>   <span class="mi">113</span> <span class="n">KBytes</span>   <span class="mi">929</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.055</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">79</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">7.0</span><span class="o">-</span> <span class="mf">8.0</span> <span class="n">sec</span>   <span class="mi">113</span> <span class="n">KBytes</span>   <span class="mi">929</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.241</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">79</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">8.0</span><span class="o">-</span> <span class="mf">9.0</span> <span class="n">sec</span>   <span class="mi">115</span> <span class="n">KBytes</span>   <span class="mi">941</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">3.886</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">80</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">9.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">112</span> <span class="n">KBytes</span>   <span class="mi">917</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">3.969</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">78</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.8</span> <span class="n">sec</span>  <span class="mf">1.19</span> <span class="n">MBytes</span>   <span class="mi">931</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">4.287</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>  <span class="mi">852</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>결과에서 보는 바와 같이, 5001번 포트로 향하는 트래픽은 대역폭 제한으로 인해 500Kbps 이하로 형성되고, 5002번 포트로 향하는 트래픽은
+800kbps의 대역폭 보장이 이루어짐을 알 수 있습니다.</p>
+</div>
+</div>
+<div class="section" id="diffserv-qos">
+<h2>DiffServ의 QoS의 동작 예제<a class="headerlink" href="#diffserv-qos" title="제목 주소">¶</a></h2>
+<p>앞의 예제에서는 플로우마다 QoS를 생성하여 상세한 제어가 가능한 반면,
+처리하는 플로우가 많아질수록 대역폭을 제어하는 스위치에 플로우가 증가하여 확장성이 없습니다.
+해당 플로우에 QoS를 처리하는 대신, DiffServ 도메인의 입구 라우터에서
+플로우를 여러 클래스로 나누어 각 클래스마다 제어를 하는 DiffServ를 적용합니다.
+DiffServ는 IP 헤더의 ToS 필드에 6 비트 DSCP 값을 사용하여 DSCP 값에 의해 정의되는 PHB에 따라 전송하도록
+QoS를 제공합니다.</p>
+<p>다음과 같은 토폴로지를 가정하고 스위치 (라우터) OFS1에 Queue 및 클래스에 대한 대역폭 제어를 설정하고, 라우터 OFS2는 플로우에 따라 DSCP 값을 표시하도록 규칙을 적용하는 예제를 소개합니다.
+또한, OFS1의 WAN 쪽 인터페이스에서 트래픽 쉐이핑을 사용하는 경우를 가정합니다.</p>
+<a class="reference internal image-reference" href="_images/fig23.png"><img alt="_images/fig23.png" class="align-center" src="_images/fig23.png" style="width: 289.6px; height: 103.6px;" /></a>
+<div class="section" id="id7">
+<h3>환경 구축<a class="headerlink" href="#id7" title="제목 주소">¶</a></h3>
+<p>우선 Mininet에 환경을 구축합니다. <code class="docutils literal"><span class="pre">mn</span></code> 명령의 매개 변수는 다음과 같습니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="15%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">매개 변수</th>
+<th class="head">값</th>
+<th class="head">설명</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>topo</td>
+<td>linear,2</td>
+<td>2개의 스위치가 일렬로 연결된 토폴로지</td>
+</tr>
+<tr class="row-odd"><td>mac</td>
+<td>없음</td>
+<td>자동으로 호스트의 MAC 주소를 설정</td>
+</tr>
+<tr class="row-even"><td>switch</td>
+<td>ovsk</td>
+<td>Open vSwitch를 사용</td>
+</tr>
+<tr class="row-odd"><td>controller</td>
+<td>remote</td>
+<td>외부 OpenFlow 컨트롤러 이용</td>
+</tr>
+<tr class="row-even"><td>x</td>
+<td>없음</td>
+<td>xterm을 시작</td>
+</tr>
+</tbody>
+</table>
+<p>실행 예는 다음과 같습니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span>ryu@ryu-vm:~$ sudo mn --topo linear,2 --mac --switch ovsk --controller remote -x
+*** Creating network
+*** Adding controller
+Unable to contact the remote controller at 127.0.0.1:6633
+*** Adding hosts:
+h1 h2
+*** Adding switches:
+s1
+*** Adding links:
+(h1, s1) (h2, s1)
+*** Configuring hosts
+h1 h2
+*** Running terms on localhost:10.0
+*** Starting controller
+*** Starting 1 switches
+s1
+*** Starting CLI:
+mininet&gt;
+</pre></div>
+</div>
+<p>또한, 컨트롤러의 xterm도 시작합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">c0</span>
+<span class="n">mininet</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>이어 스위치에서 사용하는 OpenFlow 버전을 1.3으로 설정합니다.
+또한 OVSDB에 액세스하기 위해 6632 포트로 수신하도록 설정합니다.</p>
+<p>switch: s1 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ovs-vsctl set Bridge s1 protocols=OpenFlow13</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ovs-vsctl set-manager ptcp:6632</span>
+</pre></div>
+</div>
+<p>switch: s2 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ovs-vsctl set Bridge s2 protocols=OpenFlow13</span>
+</pre></div>
+</div>
+<p>그 다음, 각 호스트에서 자동으로 할당된 IP 주소를 삭제하고 새로운 IP 주소를
+설정합니다.</p>
+<p>host: h1:</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip addr del 10.0.0.1/8 dev h1-eth0</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip addr add 172.16.20.10/24 dev h1-eth0</span>
+</pre></div>
+</div>
+<p>host: h2:</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip addr del 10.0.0.2/8 dev h2-eth0</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip addr add 172.16.10.10/24 dev h2-eth0</span>
+</pre></div>
+</div>
+<p>계속해서, 「 <a class="reference internal" href="rest_router.html#ch-rest-router"><span class="std std-ref">라우터</span></a> 」 에서 사용한 rest_router.py를 수정합니다. rest_qos.py에서는 플로우 테이블의 파이프라인에서 처리된다고 가정하고 있기에, rest_router.py의 플로우 항목을 table id:1에 등록하도록 변경합니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/0, cmd/1, cmd/&#39; ryu/ryu/app/rest_router.py &gt; ryu/ryu/app/qos_rest_router.py</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># cd ryu/; python ./setup.py install</span>
+</pre></div>
+</div>
+<p>마지막으로, 컨트롤러 xterm에서 rest_qos, qos_rest_router, rest_conf_switch을 시작합니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@mininet</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~/</span><span class="n">ryu</span><span class="c1"># ryu-manager ryu.app.rest_qos ryu.app.qos_rest_router ryu.app.rest_conf_switch</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_rest_router</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_conf_switch</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">DPSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">dpset</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">ConfSwitchSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">conf_switch</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">wsgi</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_conf_switch</span> <span class="n">of</span> <span class="n">ConfSwitchAPI</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_rest_router</span> <span class="n">of</span> <span class="n">RestRouterAPI</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span> <span class="n">of</span> <span class="n">OFPHandler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span> <span class="n">of</span> <span class="n">RestQoSAPI</span>
+<span class="p">(</span><span class="mi">4687</span><span class="p">)</span> <span class="n">wsgi</span> <span class="n">starting</span> <span class="n">up</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>Ryu와 스위치 간의 연결에 성공하면 다음 메시지가 표시됩니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Set</span> <span class="n">SW</span> <span class="n">config</span> <span class="k">for</span> <span class="n">TTL</span> <span class="n">error</span> <span class="n">packet</span> <span class="ow">in</span><span class="o">.</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Set</span> <span class="n">ARP</span> <span class="n">handling</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">in</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Set</span> <span class="n">L2</span> <span class="n">switching</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Set</span> <span class="n">default</span> <span class="n">route</span> <span class="p">(</span><span class="n">drop</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Start</span> <span class="n">cyclic</span> <span class="n">routing</span> <span class="n">table</span> <span class="n">update</span><span class="o">.</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Join</span> <span class="k">as</span> <span class="n">router</span><span class="o">.</span>
+<span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Set</span> <span class="n">SW</span> <span class="n">config</span> <span class="k">for</span> <span class="n">TTL</span> <span class="n">error</span> <span class="n">packet</span> <span class="ow">in</span><span class="o">.</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Set</span> <span class="n">ARP</span> <span class="n">handling</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">in</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Set</span> <span class="n">L2</span> <span class="n">switching</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Set</span> <span class="n">default</span> <span class="n">route</span> <span class="p">(</span><span class="n">drop</span><span class="p">)</span> <span class="n">flow</span> <span class="p">[</span><span class="n">cookie</span><span class="o">=</span><span class="mh">0x0</span><span class="p">]</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Start</span> <span class="n">cyclic</span> <span class="n">routing</span> <span class="n">table</span> <span class="n">update</span><span class="o">.</span>
+<span class="p">[</span><span class="n">RT</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">switch_id</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Join</span> <span class="k">as</span> <span class="n">router</span><span class="o">.</span>
+<span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>위 로그가 표시되면 준비가 완료된 것입니다.</p>
+</div>
+<div class="section" id="id8">
+<h3>Queue 설정<a class="headerlink" href="#id8" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="27%" />
+<col width="27%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">큐 ID</th>
+<th class="head">최대 속도</th>
+<th class="head">최소 속도</th>
+<th class="head">클래스</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0</td>
+<td>1Mbps</td>
+<td>-</td>
+<td>Default</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>(1Mbps)</td>
+<td>200Kbps</td>
+<td>AF3</td>
+</tr>
+<tr class="row-even"><td>2</td>
+<td>(1Mbps)</td>
+<td>500Kbps</td>
+<td>AF4</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">이후의 설명에서 사용하는 REST API의 자세한 내용은 장 끝부분의 「 <a class="reference internal" href="#rest-api">REST API 목록</a> 」을 참조하십시오.</p>
+</div>
+<p>우선, OVSDB에 액세스하기위한 설정을 합니다.</p>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X PUT -d &#39;&quot;tcp:127.0.0.1:6632&quot;&#39; http://localhost:8080/v1.0/conf/switches/0000000000000001/ovsdb_addr</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>이어, Queue를 설정합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;port_name&quot;: &quot;s1-eth1&quot;, &quot;type&quot;: &quot;linux-htb&quot;, &quot;max_rate&quot;: &quot;1000000&quot;, &quot;queues&quot;:[{&quot;max_rate&quot;: &quot;1000000&quot;}, {&quot;min_rate&quot;: &quot;200000&quot;}, {&quot;min_rate&quot;: &quot;500000&quot;}]}&#39; http://localhost:8080/qos/queue/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s2">&quot;max-rate&quot;</span><span class="p">:</span> <span class="s2">&quot;1000000&quot;</span>
+            <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s2">&quot;min-rate&quot;</span><span class="p">:</span> <span class="s2">&quot;200000&quot;</span>
+            <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s2">&quot;min-rate&quot;</span><span class="p">:</span> <span class="s2">&quot;500000&quot;</span>
+            <span class="p">}</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">REST 명령의 실행 결과는 보기 쉽도록 포맷화하였습니다.</p>
+</div>
+</div>
+<div class="section" id="id9">
+<h3>라우터 설정<a class="headerlink" href="#id9" title="제목 주소">¶</a></h3>
+<p>각 라우터에 주소, 기본 경로를 설정합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.20.1/24&quot;}&#39; http://localhost:8080/router/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add address [address_id=1]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.10/24&quot;}&#39; http://localhost:8080/router/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add address [address_id=2]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.1&quot;}&#39; http://localhost:8080/router/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add route [route_id=1]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.10.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add address [address_id=1]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;address&quot;: &quot;172.16.30.1/24&quot;}&#39; http://localhost:8080/router/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add address [address_id=2]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;gateway&quot;: &quot;172.16.30.10&quot;}&#39; http://localhost:8080/router/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Add route [route_id=1]&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>라우터에 IP 주소를 구성할 수 있으므로 각 호스트에 기본 게이트웨이를
+등록합니다.</p>
+<p>host: h1:</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip route add default via 172.16.20.1</span>
+</pre></div>
+</div>
+<p>host: h2:</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># ip route add default via 172.16.10.1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id10">
+<h3>QoS 설정<a class="headerlink" href="#id10" title="제목 주소">¶</a></h3>
+<p>다음 라우터 (s1)에 DSCP 값에 따른 제어 플로우를 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="26%" />
+<col width="26%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">(우선 순위)</th>
+<th class="head">DSCP</th>
+<th class="head">대기열 ID</th>
+<th class="head">(QoS ID)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>26(AF31)</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>34(AF41)</td>
+<td>2</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;26&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;34&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=2&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+<p>다음 라우터 (s2)에 마킹하는 플로우를 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="18%" />
+<col width="18%" />
+<col width="17%" />
+<col width="12%" />
+<col width="17%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">(우선 순위)</th>
+<th class="head">대상</th>
+<th class="head">대상 포트</th>
+<th class="head">프로토콜</th>
+<th class="head">DSCP</th>
+<th class="head">(QoS ID)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>172.16.20.10</td>
+<td>5002</td>
+<td>UDP</td>
+<td>26(AF31)</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>172.16.20.10</td>
+<td>5003</td>
+<td>UDP</td>
+<td>34(AF41)</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5002&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;26&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;nw_dst&quot;: &quot;172.16.20.10&quot;, &quot;nw_proto&quot;: &quot;UDP&quot;, &quot;tp_dst&quot;: &quot;5003&quot;}, &quot;actions&quot;:{&quot;mark&quot;: &quot;34&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=2&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>설정 내용 확인<a class="headerlink" href="#id11" title="제목 주소">¶</a></h3>
+<p>각 스위치에 설정된 내용을 확인합니다.</p>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">34</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">2</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;nw_proto&quot;</span><span class="p">:</span> <span class="s2">&quot;UDP&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;tp_dst&quot;</span><span class="p">:</span> <span class="mi">5002</span><span class="p">,</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;nw_dst&quot;</span><span class="p">:</span> <span class="s2">&quot;172.16.20.10&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;mark&quot;</span><span class="p">:</span> <span class="s2">&quot;26&quot;</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;nw_proto&quot;</span><span class="p">:</span> <span class="s2">&quot;UDP&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;tp_dst&quot;</span><span class="p">:</span> <span class="mi">5003</span><span class="p">,</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+              <span class="s2">&quot;nw_dst&quot;</span><span class="p">:</span> <span class="s2">&quot;172.16.20.10&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;mark&quot;</span><span class="p">:</span> <span class="s2">&quot;34&quot;</span>
+                <span class="p">}</span>
+              <span class="p">]</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>대역폭 측정<a class="headerlink" href="#id12" title="제목 주소">¶</a></h3>
+<p>이 상태에서 iperf 대역 측정을 합니다.
+h1 서버에서는 UDP 프로토콜로 포트 번호 5001, 5002, 5003에서 수신 대기합니다. h2 클라이언트에서는 h1 5001 포트로 1Mbps의 UDP 트래픽을, h1 5002 포트로 300Kbps UDP 트래픽을, 그리고 h1 5003 포트로 600Kbps UDP 트래픽을 전송합니다.</p>
+<p>먼저, h2 터미널을 시작합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h2</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h2</span>
+</pre></div>
+</div>
+<p>Node: h1(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -p 5002 &amp;</span>
+<span class="o">...</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -p 5003 &amp;</span>
+<span class="o">...</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -i 1 5001</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Server</span> <span class="n">listening</span> <span class="n">on</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="n">Receiving</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+</pre></div>
+</div>
+<p>Node: h2(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 172.16.20.10 -p 5001 -u -b 1M</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h2(2) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 172.16.20.10 -p 5002 -u -b 300K</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">20.10</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">10.10</span> <span class="n">port</span> <span class="mi">44077</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">20.10</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.1</span> <span class="n">sec</span>   <span class="mi">369</span> <span class="n">KBytes</span>   <span class="mi">300</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">257</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.2</span> <span class="n">sec</span>   <span class="mi">369</span> <span class="n">KBytes</span>   <span class="mi">295</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">17.379</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>  <span class="mi">257</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Node: h2(3) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 172.16.20.10 -p 5003 -u -b 600K</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">20.10</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5003</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">10.10</span> <span class="n">port</span> <span class="mi">59280</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">20.10</span> <span class="n">port</span> <span class="mi">5003</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">512</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">5.401</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>  <span class="mi">512</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Node: h1(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">20.10</span> <span class="n">port</span> <span class="mi">5001</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">172.16</span><span class="o">.</span><span class="mf">10.10</span> <span class="n">port</span> <span class="mi">37329</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>        <span class="n">Jitter</span>   <span class="n">Lost</span><span class="o">/</span><span class="n">Total</span> <span class="n">Datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span> <span class="mf">1.0</span> <span class="n">sec</span>   <span class="mi">119</span> <span class="n">KBytes</span>   <span class="mi">976</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.639</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">83</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">1.0</span><span class="o">-</span> <span class="mf">2.0</span> <span class="n">sec</span>   <span class="mi">118</span> <span class="n">KBytes</span>   <span class="mi">964</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.680</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">82</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">2.0</span><span class="o">-</span> <span class="mf">3.0</span> <span class="n">sec</span>  <span class="mf">87.6</span> <span class="n">KBytes</span>   <span class="mi">717</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">5.817</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">61</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">3.0</span><span class="o">-</span> <span class="mf">4.0</span> <span class="n">sec</span>  <span class="mf">81.8</span> <span class="n">KBytes</span>   <span class="mi">670</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">5.700</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">57</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">4.0</span><span class="o">-</span> <span class="mf">5.0</span> <span class="n">sec</span>  <span class="mf">66.0</span> <span class="n">KBytes</span>   <span class="mi">541</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">12.772</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">46</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">5.0</span><span class="o">-</span> <span class="mf">6.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">60.590</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">6.0</span><span class="o">-</span> <span class="mf">7.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">89.968</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">7.0</span><span class="o">-</span> <span class="mf">8.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">108.364</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">8.0</span><span class="o">-</span> <span class="mf">9.0</span> <span class="n">sec</span>  <span class="mf">10.0</span> <span class="n">KBytes</span>  <span class="mf">82.3</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">125.635</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">7</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">9.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">130.604</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">10.0</span><span class="o">-</span><span class="mf">11.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">140.192</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">11.0</span><span class="o">-</span><span class="mf">12.0</span> <span class="n">sec</span>  <span class="mf">8.61</span> <span class="n">KBytes</span>  <span class="mf">70.6</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">144.411</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>    <span class="mi">6</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">12.0</span><span class="o">-</span><span class="mf">13.0</span> <span class="n">sec</span>  <span class="mf">28.7</span> <span class="n">KBytes</span>   <span class="mi">235</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">63.964</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">20</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">13.0</span><span class="o">-</span><span class="mf">14.0</span> <span class="n">sec</span>  <span class="mf">44.5</span> <span class="n">KBytes</span>   <span class="mi">365</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">26.721</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">31</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">14.0</span><span class="o">-</span><span class="mf">15.0</span> <span class="n">sec</span>  <span class="mf">57.4</span> <span class="n">KBytes</span>   <span class="mi">470</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">9.396</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">40</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">15.0</span><span class="o">-</span><span class="mf">16.0</span> <span class="n">sec</span>   <span class="mi">118</span> <span class="n">KBytes</span>   <span class="mi">964</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.956</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">82</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">16.0</span><span class="o">-</span><span class="mf">17.0</span> <span class="n">sec</span>   <span class="mi">119</span> <span class="n">KBytes</span>   <span class="mi">976</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.820</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">83</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">17.0</span><span class="o">-</span><span class="mf">18.0</span> <span class="n">sec</span>   <span class="mi">118</span> <span class="n">KBytes</span>   <span class="mi">964</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.741</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">82</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="mf">18.0</span><span class="o">-</span><span class="mf">19.0</span> <span class="n">sec</span>   <span class="mi">118</span> <span class="n">KBytes</span>   <span class="mi">964</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.839</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>   <span class="mi">82</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">19.7</span> <span class="n">sec</span>  <span class="mf">1.19</span> <span class="n">MBytes</span>   <span class="mi">508</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">0.981</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>  <span class="mi">852</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>AF41로 마킹된 트래픽은 500Kbps의 대역폭이 보장되고, AF31로 마킹된 트래픽은 200Kbps의 대역폭이 보장됩니다. 한편, Best-effort 트래픽은 AF에 표시되는 트래픽이 흐르는 동안 대역폭이 감소함을 알 수 있습니다. 이와 같이 DiffServ 의해 QoS가 제공되는지 확인할 수 있었습니다.</p>
+</div>
+</div>
+<div class="section" id="meter-table-qos">
+<h2>Meter Table을 사용한 QoS의 동작 예<a class="headerlink" href="#meter-table-qos" title="제목 주소">¶</a></h2>
+<p>OpenFlow 1.3에서 Meter Table이 도입되어, OpenFlow에서 트래픽 폴리싱이 가능해졌습니다. 여기서는 Meter Table 사용 예를 소개합니다.
+이 예제에서는 Meter Table을 지원하는 OpenFlow Switch인 ofsoftswitch13(<a class="reference external" href="https://github.com/CPqD/ofsoftswitch13">https://github.com/CPqD/ofsoftswitch13</a>)을 사용합니다.</p>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p class="last">ofsoftswitch13의 설치 절차 등에 대해서는 여기서 다루지 않습니다.
+참고:
+(<a class="reference external" href="https://github.com/CPqD/ofsoftswitch13/wiki/OpenFlow-1.3-Tutorial">https://github.com/CPqD/ofsoftswitch13/wiki/OpenFlow-1.3-Tutorial</a>)</p>
+</div>
+<p>다음과 같이 여러 DiffServ 도메인 (DS 도메인)으로 구성된 네트워크를 가정합니다.
+DS 도메인의 경계에 위치하는 라우터 (에지 라우터)에 의해 계량이 이루어 지정된 대역폭을 초과하는 트래픽은 다시 표시됩니다.
+보통, 다시 마킹된 패킷은 우선적으로 삭제 되거나 우선 순위가 낮은 클래스로 처리됩니다.
+예를 들어, AF1 클래스에 800Kbps의 대역폭을 보증하고 각 DS 도메인에서 유입되는 AF11 트래픽을 400Kbps로 대역폭을 지정하면, 그 이상은 초과 트래픽으로 패킷 AF12에 다시 표시됩니다.
+그러나 이 때, AF12은 Best-effort 트래픽으로 보장되도록 설정합니다.</p>
+<a class="reference internal image-reference" href="_images/fig33.png"><img alt="_images/fig33.png" class="align-center" src="_images/fig33.png" style="width: 414.4px; height: 279.6px;" /></a>
+<div class="section" id="id13">
+<h3>환경 구축<a class="headerlink" href="#id13" title="제목 주소">¶</a></h3>
+<p>우선 Mininet으로 환경을 구축합니다.
+Python 스크립트로 토폴로지를 생성합니다.</p>
+<p>소스 이름： <code class="docutils literal"><span class="pre">qos_sample_topology.py</span></code></p>
+<div class="sourcecode highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mininet.net</span> <span class="k">import</span> <span class="n">Mininet</span>
+<span class="kn">from</span> <span class="nn">mininet.cli</span> <span class="k">import</span> <span class="n">CLI</span>
+<span class="kn">from</span> <span class="nn">mininet.topo</span> <span class="k">import</span> <span class="n">Topo</span>
+<span class="kn">from</span> <span class="nn">mininet.node</span> <span class="k">import</span> <span class="n">UserSwitch</span>
+<span class="kn">from</span> <span class="nn">mininet.node</span> <span class="k">import</span> <span class="n">RemoteController</span>
+
+<span class="k">class</span> <span class="nc">SliceableSwitch</span><span class="p">(</span><span class="n">UserSwitch</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">UserSwitch</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MyTopo</span><span class="p">(</span><span class="n">Topo</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="s2">&quot;Create custom topo.&quot;</span>
+        <span class="c1"># Initialize topology</span>
+        <span class="n">Topo</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="c1"># Add hosts and switches</span>
+        <span class="n">host01</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addHost</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">)</span>
+        <span class="n">host02</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addHost</span><span class="p">(</span><span class="s1">&#39;h2&#39;</span><span class="p">)</span>
+        <span class="n">host03</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addHost</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">)</span>
+        <span class="n">switch01</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addSwitch</span><span class="p">(</span><span class="s1">&#39;s1&#39;</span><span class="p">)</span>
+        <span class="n">switch02</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addSwitch</span><span class="p">(</span><span class="s1">&#39;s2&#39;</span><span class="p">)</span>
+        <span class="n">switch03</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addSwitch</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">)</span>
+        <span class="c1"># Add links</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addLink</span><span class="p">(</span><span class="n">host01</span><span class="p">,</span> <span class="n">switch01</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addLink</span><span class="p">(</span><span class="n">host02</span><span class="p">,</span> <span class="n">switch02</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addLink</span><span class="p">(</span><span class="n">host03</span><span class="p">,</span> <span class="n">switch03</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addLink</span><span class="p">(</span><span class="n">switch01</span><span class="p">,</span> <span class="n">switch02</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addLink</span><span class="p">(</span><span class="n">switch01</span><span class="p">,</span> <span class="n">switch03</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
+    <span class="n">s1</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">getNodeByName</span><span class="p">(</span><span class="s1">&#39;s1&#39;</span><span class="p">)</span>
+    <span class="n">s1</span><span class="o">.</span><span class="n">cmdPrint</span><span class="p">(</span><span class="s1">&#39;dpctl unix:/tmp/s1 queue-mod 1 1 80&#39;</span><span class="p">)</span>
+    <span class="n">s1</span><span class="o">.</span><span class="n">cmdPrint</span><span class="p">(</span><span class="s1">&#39;dpctl unix:/tmp/s1 queue-mod 1 2 120&#39;</span><span class="p">)</span>
+    <span class="n">s1</span><span class="o">.</span><span class="n">cmdPrint</span><span class="p">(</span><span class="s1">&#39;dpctl unix:/tmp/s1 queue-mod 1 3 800&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">genericTest</span><span class="p">(</span><span class="n">topo</span><span class="p">):</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">Mininet</span><span class="p">(</span><span class="n">topo</span><span class="o">=</span><span class="n">topo</span><span class="p">,</span> <span class="n">switch</span><span class="o">=</span><span class="n">SliceableSwitch</span><span class="p">,</span>
+        <span class="n">controller</span><span class="o">=</span><span class="n">RemoteController</span><span class="p">)</span>
+    <span class="n">net</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+    <span class="n">CLI</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+    <span class="n">net</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">topo</span> <span class="o">=</span> <span class="n">MyTopo</span><span class="p">()</span>
+    <span class="n">genericTest</span><span class="p">(</span><span class="n">topo</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">주석</p>
+<p>미리 ofsoftswitch13 링크 속도를 1Mbps로 변경합니다.</p>
+<p>먼저, ofsoftswitch13의 소스 코드를 수정합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span>$ cd ofsoftswitch13
+$ gedit lib/netdev.c
+</pre></div>
+</div>
+<p>lib/netdev.c:</p>
+<div class="sourcecode highlight-default"><div class="highlight"><pre><span></span><span class="mi">644</span>           <span class="k">if</span> <span class="p">(</span><span class="n">ecmd</span><span class="o">.</span><span class="n">autoneg</span><span class="p">)</span> <span class="p">{</span>
+<span class="mi">645</span>               <span class="n">netdev</span><span class="o">-&gt;</span><span class="n">curr</span> <span class="o">|=</span> <span class="n">OFPPF_AUTONEG</span><span class="p">;</span>
+<span class="mi">646</span>           <span class="p">}</span>
+<span class="mi">647</span>
+<span class="mi">648</span> <span class="o">-</span>         <span class="n">netdev</span><span class="o">-&gt;</span><span class="n">speed</span> <span class="o">=</span> <span class="n">ecmd</span><span class="o">.</span><span class="n">speed</span><span class="p">;</span>
+<span class="mi">649</span> <span class="o">+</span>         <span class="n">netdev</span><span class="o">-&gt;</span><span class="n">speed</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>  <span class="o">/*</span> <span class="n">Fix</span> <span class="n">to</span> <span class="mi">1</span><span class="n">Mbps</span> <span class="n">link</span> <span class="o">*/</span>
+<span class="mi">650</span>
+<span class="mi">651</span>       <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+<span class="mi">652</span>           <span class="n">VLOG_DBG</span><span class="p">(</span><span class="n">LOG_MODULE</span><span class="p">,</span> <span class="s2">&quot;ioctl(SIOCETHTOOL) failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+<span class="mi">653</span>       <span class="p">}</span>
+</pre></div>
+</div>
+<p>그리고 ofsoftswitch13를 다시 설치합니다.</p>
+<div class="console last highlight-default"><div class="highlight"><pre><span></span>$ make clean
+$ ./boot.sh
+$ ./configure
+$ make
+$ sudo make install
+</pre></div>
+</div>
+</div>
+<p>실행 예는 다음과 같습니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span>mininet@mininet-vm:~$ sudo python qos_sample_topology.py
+Unable to contact the remote controller at 127.0.0.1:6633
+mininet&gt;
+</pre></div>
+</div>
+<p>또한 컨트롤로의 xterm을 실행해야 합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">c0</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">c0</span>
+<span class="n">mininet</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>이어, 「 <a class="reference internal" href="switching_hub.html#ch-switching-hub"><span class="std std-ref">스위칭 허브</span></a> 」에서 사용했던 simple_switch_13.py을 변경합니다. rest_qos.py에서는 플로우 테이블의 파이프라인에서 처리된다고 가정하기에, simple_switch_13.py의 플로우 항목을 table id:1에 등록하도록 변경합니다.</p>
+<p>controller: c0 (root)</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># sed &#39;/OFPFlowMod(/,/)/s/)/, table_id=1)/&#39; ryu/ryu/app/simple_switch_13.py &gt; ryu/ryu/app/qos_simple_switch_13.py</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># cd ryu/; python ./setup.py install</span>
+</pre></div>
+</div>
+<p>마지막으로, 컨트롤러 xterm에서 rest_qos, qos_simple_switch_13을 시작합니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@mininet</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~/</span><span class="n">ryu</span><span class="c1"># ryu-manager ryu.app.rest_qos ryu.app.qos_simple_switch_13</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_simple_switch_13</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">loading</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">DPSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">dpset</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="kc">None</span> <span class="n">of</span> <span class="n">ConfSwitchSet</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">conf_switch</span>
+<span class="n">creating</span> <span class="n">context</span> <span class="n">wsgi</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">qos_simple_switch_13</span> <span class="n">of</span> <span class="n">SimpleSwitch13</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">ofp_handler</span> <span class="n">of</span> <span class="n">OFPHandler</span>
+<span class="n">instantiating</span> <span class="n">app</span> <span class="n">ryu</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">rest_qos</span> <span class="n">of</span> <span class="n">RestQoSAPI</span>
+<span class="p">(</span><span class="mi">2348</span><span class="p">)</span> <span class="n">wsgi</span> <span class="n">starting</span> <span class="n">up</span> <span class="n">on</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">:</span><span class="mi">8080</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>Ryu와 스위치와의 연결에 성공하면 다음 메시지가 표시됩니다.</p>
+<p>controller: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000003</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+<span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000001</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+<span class="p">[</span><span class="n">QoS</span><span class="p">][</span><span class="n">INFO</span><span class="p">]</span> <span class="n">dpid</span><span class="o">=</span><span class="mi">0000000000000002</span><span class="p">:</span> <span class="n">Join</span> <span class="n">qos</span> <span class="n">switch</span><span class="o">.</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id14">
+<h3>QoS 설정<a class="headerlink" href="#id14" title="제목 주소">¶</a></h3>
+<p>다음과 같이 스위치 (s1)에 DSCP 값에 따라 제어 플로우를 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="26%" />
+<col width="26%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">(우선 순위)</th>
+<th class="head">DSCP</th>
+<th class="head">큐 ID</th>
+<th class="head">(QoS ID)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>0 (BE)</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>12(AF12)</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="row-even"><td>1</td>
+<td>10(AF11)</td>
+<td>3</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=2&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;2&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=3&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;0&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=4&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;3&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=5&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;12&quot;, &quot;in_port&quot;: &quot;3&quot;}, &quot;actions&quot;:{&quot;queue&quot;: &quot;2&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=6&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+<p>다음과 같이 스위치 (s2, s3)에 미터 항목을 설정합니다.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="26%" />
+<col width="26%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">(우선 순위)</th>
+<th class="head">DSCP</th>
+<th class="head">미터 ID</th>
+<th class="head">(QoS ID)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>10(AF11)</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="21%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">미터 ID</th>
+<th class="head">Flags</th>
+<th class="head">Bands</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>KBPS</td>
+<td>type:DSCP_REMARK,
+rate:400000,
+prec_level:1</td>
+</tr>
+</tbody>
+</table>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Meter added. : Meter ID=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;match&quot;: {&quot;ip_dscp&quot;: &quot;10&quot;}, &quot;actions&quot;:{&quot;meter&quot;: &quot;1&quot;}}&#39; http://localhost:8080/qos/rules/0000000000000003</span>
+<span class="p">[</span>
+  <span class="p">{</span>
+    <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;QoS added. : qos_id=1&quot;</span>
+      <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X POST -d &#39;{&quot;meter_id&quot;: &quot;1&quot;, &quot;flags&quot;: &quot;KBPS&quot;, &quot;bands&quot;:[{&quot;type&quot;:&quot;DSCP_REMARK&quot;, &quot;rate&quot;: &quot;400&quot;, &quot;prec_level&quot;: &quot;1&quot;}]}&#39; http://localhost:8080/qos/meter/0000000000000003</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000003&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="s2">&quot;Meter added. : Meter ID=1&quot;</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id15">
+<h3>설정 내용 확인<a class="headerlink" href="#id15" title="제목 주소">¶</a></h3>
+<p>각 스위치에 설정된 내용을 확인합니다.</p>
+<p>Node: c0 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000001</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000001&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;3&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">10</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">12</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">4</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;3&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">10</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;queue&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+              <span class="s2">&quot;in_port&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">12</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000002</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000002&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;meter&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># curl -X GET http://localhost:8080/qos/rules/0000000000000003</span>
+  <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;switch_id&quot;</span><span class="p">:</span> <span class="s2">&quot;0000000000000003&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;command_result&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+          <span class="s2">&quot;qos&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+              <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+              <span class="s2">&quot;dl_type&quot;</span><span class="p">:</span> <span class="s2">&quot;IPv4&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;ip_dscp&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+              <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                  <span class="s2">&quot;meter&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+              <span class="p">],</span>
+              <span class="s2">&quot;qos_id&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+          <span class="p">]</span>
+        <span class="p">}</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id16">
+<h3>대역폭 측정<a class="headerlink" href="#id16" title="제목 주소">¶</a></h3>
+<p>이 상태에서 iperf로 대역폭 측정을 해 봅니다.
+h1 서버에서는 UDP 프로토콜에 해당하는 포트 번호 5001, 5002, 5003에서 수신 대기합니다.
+h2, h3는 클라이언트로, h1에 각각 지정된 유형의 트래픽을 보냅니다.</p>
+<p>우선, h1과 h2에 2개, h3에 1개씩 터미널을 시작합니다.</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h1</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h2</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h3</span>
+<span class="n">mininet</span><span class="o">&gt;</span> <span class="n">xterm</span> <span class="n">h3</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Node: h1(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -p 5001 &amp;</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -p 5002 &amp;</span>
+<span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -s -u -p 5003 &amp;</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<div class="section" id="best-effort-af11">
+<h4>Best-effort 및 AF11 트래픽 초과량 발생<a class="headerlink" href="#best-effort-af11" title="제목 주소">¶</a></h4>
+<p>Node: h2 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5001 -u -b 800K</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.3</span> <span class="n">port</span> <span class="mi">60324</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">979</span> <span class="n">KBytes</span>   <span class="mi">800</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">682</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">11.9</span> <span class="n">sec</span>   <span class="mi">650</span> <span class="n">KBytes</span>   <span class="mi">449</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">18.458</span> <span class="n">ms</span>  <span class="mi">229</span><span class="o">/</span>  <span class="mi">682</span> <span class="p">(</span><span class="mi">34</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Node: h3(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.2</span> <span class="n">port</span> <span class="mi">53661</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">512</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>   <span class="mf">7.497</span> <span class="n">ms</span>    <span class="mi">6</span><span class="o">/</span>  <span class="mi">512</span> <span class="p">(</span><span class="mf">1.2</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>  <span class="mi">6</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+</pre></div>
+</div>
+<p>AF11 트래픽이 계약 대역폭인 400Kbps를 초과하는 경우에도 Best-effort 트래픽보다
+대역폭이 보장되어 있는 것을 확인할 수 있습니다.</p>
+</div>
+<div class="section" id="af11-best-effort-af11">
+<h4>AF11 초과 트래픽과 Best-effort와 AF11 계약 대역 내 트래픽<a class="headerlink" href="#af11-best-effort-af11" title="제목 주소">¶</a></h4>
+<p>Node: h2 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.2</span> <span class="n">port</span> <span class="mi">42758</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">512</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">666</span> <span class="n">KBytes</span>   <span class="mi">544</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">500.361</span> <span class="n">ms</span>   <span class="mi">48</span><span class="o">/</span>  <span class="mi">512</span> <span class="p">(</span><span class="mf">9.4</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>  <span class="mi">192</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+</pre></div>
+</div>
+<p>Node: h3(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5002 -u -b 500K</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.3</span> <span class="n">port</span> <span class="mi">42759</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">613</span> <span class="n">KBytes</span>   <span class="mi">500</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">427</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">did</span> <span class="ow">not</span> <span class="n">receive</span> <span class="n">ack</span> <span class="n">of</span> <span class="n">last</span> <span class="n">datagram</span> <span class="n">after</span> <span class="mi">10</span> <span class="n">tries</span><span class="o">.</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">14.0</span> <span class="n">sec</span>   <span class="mi">359</span> <span class="n">KBytes</span>   <span class="mi">210</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">102.479</span> <span class="n">ms</span>  <span class="mi">177</span><span class="o">/</span>  <span class="mi">427</span> <span class="p">(</span><span class="mi">41</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Node: h3(2) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5003 -u -b 400K --tos 0x28</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5003</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.3</span> <span class="n">port</span> <span class="mi">35475</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5003</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.1</span> <span class="n">sec</span>   <span class="mi">491</span> <span class="n">KBytes</span>   <span class="mi">400</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">342</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.5</span> <span class="n">sec</span>   <span class="mi">491</span> <span class="n">KBytes</span>   <span class="mi">384</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">15.422</span> <span class="n">ms</span>    <span class="mi">0</span><span class="o">/</span>  <span class="mi">342</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>400Kbps의 계약 내역에 해당하는 트래픽은 드롭되지 않는 것을 알 수 있습니다.</p>
+</div>
+<div class="section" id="af11-af11">
+<h4>AF11 초과 트래픽과 AF11 초과 트래픽<a class="headerlink" href="#af11-af11" title="제목 주소">¶</a></h4>
+<p>Node: h2 (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5001 -u -b 600K --tos 0x28</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.3</span> <span class="n">port</span> <span class="mi">50761</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5001</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">512</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">11.0</span> <span class="n">sec</span>   <span class="mi">673</span> <span class="n">KBytes</span>   <span class="mi">501</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">964.490</span> <span class="n">ms</span>   <span class="mi">43</span><span class="o">/</span>  <span class="mi">512</span> <span class="p">(</span><span class="mf">8.4</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">11.0</span> <span class="n">sec</span>  <span class="mi">95</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+</pre></div>
+</div>
+<p>Node: h3(1) (root):</p>
+<div class="console highlight-default"><div class="highlight"><pre><span></span><span class="n">root</span><span class="nd">@ryu</span><span class="o">-</span><span class="n">vm</span><span class="p">:</span><span class="o">~</span><span class="c1"># iperf -c 10.0.0.1 -p 5002 -u -b 600K --tos 0x28</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="n">Client</span> <span class="n">connecting</span> <span class="n">to</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">UDP</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="n">Sending</span> <span class="mi">1470</span> <span class="n">byte</span> <span class="n">datagrams</span>
+<span class="n">UDP</span> <span class="n">buffer</span> <span class="n">size</span><span class="p">:</span>  <span class="mi">208</span> <span class="n">KByte</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>
+<span class="o">------------------------------------------------------------</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">local</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.2</span> <span class="n">port</span> <span class="mi">53066</span> <span class="n">connected</span> <span class="k">with</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="n">port</span> <span class="mi">5002</span>
+<span class="p">[</span> <span class="n">ID</span><span class="p">]</span> <span class="n">Interval</span>       <span class="n">Transfer</span>     <span class="n">Bandwidth</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.0</span> <span class="n">sec</span>   <span class="mi">735</span> <span class="n">KBytes</span>   <span class="mi">600</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Sent</span> <span class="mi">512</span> <span class="n">datagrams</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span> <span class="n">Server</span> <span class="n">Report</span><span class="p">:</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.6</span> <span class="n">sec</span>   <span class="mi">665</span> <span class="n">KBytes</span>   <span class="mi">515</span> <span class="n">Kbits</span><span class="o">/</span><span class="n">sec</span>  <span class="mf">897.126</span> <span class="n">ms</span>   <span class="mi">49</span><span class="o">/</span>  <span class="mi">512</span> <span class="p">(</span><span class="mf">9.6</span><span class="o">%</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">4</span><span class="p">]</span>  <span class="mf">0.0</span><span class="o">-</span><span class="mf">10.6</span> <span class="n">sec</span>  <span class="mi">93</span> <span class="n">datagrams</span> <span class="n">received</span> <span class="n">out</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">order</span>
+</pre></div>
+</div>
+<p>초과 트래픽은 동일한 수준으로 드롭되어있는 것을 알 수 있습니다.</p>
+<p>이 장에서는 구체적인 예를 들면서 QoS REST API의 사용 방법을 설명했습니다.</p>
+</div>
+</div>
+</div>
+<div class="section" id="rest-api">
+<h2>REST API 목록<a class="headerlink" href="#rest-api" title="제목 주소">¶</a></h2>
+<p>이 장에서 소개했던 reqt_qos의 REST API 목록입니다.</p>
+<div class="section" id="id17">
+<h3>큐 상태 얻기<a class="headerlink" href="#id17" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>GET</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/queue/status/{<strong>switch</strong>}</p>
+<p class="last">&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id18">
+<h3>큐 설정 정보 얻기<a class="headerlink" href="#id18" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>GET</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/queue/{<strong>switch</strong>}</p>
+<p class="last">&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>참고</strong></td>
+<td>QoS REST API를 시작한 이후 활성화된 큐의 설정 정보만 얻을 수 있습니다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id19">
+<h3>큐 설정<a class="headerlink" href="#id19" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>POST</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/queue/{<strong>switch</strong>}</p>
+<p class="last">&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>데이터</strong></td>
+<td><p class="first"><strong>port_name</strong>:[구성된 포트 이름]</p>
+<p><strong>type</strong>:[linux-htb | linux-hfsc]</p>
+<p><strong>max_rate</strong>:[대역폭(bps)]</p>
+<p><strong>queues</strong>:</p>
+<blockquote class="last">
+<div><p><strong>max_rate</strong>:[대역폭(bps)]</p>
+<p><strong>min_rate</strong>:[대역폭(bps)]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><strong>참고</strong></td>
+<td><p class="first">기존 설정이 있는 경우 덮어씁니다.</p>
+<p>OpenvSwitch에서만 설정이 가능합니다.</p>
+<p>port_name 매개 변수는 옵션이니다.</p>
+<p class="last">port_name을 지정하지 않으면 모든 포트에 설정됩니다.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id20">
+<h3>큐 삭제<a class="headerlink" href="#id20" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="79%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>DELETE</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/queue/{<strong>swtich</strong>}</p>
+<p class="last">&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>참고</strong></td>
+<td>OVSDB의 QoS 레코드와의 관계를 제거합니다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id21">
+<h3>전체 QoS 규칙 얻기<a class="headerlink" href="#id21" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>GET</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/rules/{<strong>switch</strong>}[/{<strong>vlan</strong>}]</p>
+<p>&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+<p class="last">&#8211;<strong>vlan</strong>: [ &#8220;all&#8221; | <em>VLAN ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>참고</strong></td>
+<td>VLAN ID 지정은 옵션입니다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id22">
+<h3>QoS 규칙 추가<a class="headerlink" href="#id22" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>POST</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/rules/{<strong>switch</strong>}[/{<strong>vlan</strong>}]</p>
+<p>&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+<p class="last">&#8211;<strong>vlan</strong>: [ &#8220;all&#8221; | <em>VLAN ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>데이터</strong></td>
+<td><p class="first"><strong>priority</strong>:[ 0 - 65535 ]</p>
+<p><strong>match</strong>:</p>
+<blockquote>
+<div><p><strong>in_port</strong>:[ 0 - 65535 ]</p>
+<p><strong>dl_src</strong>:&#8221;&lt;xx:xx:xx:xx:xx:xx&gt;&#8221;</p>
+<p><strong>dl_dst</strong>:&#8221;&lt;xx:xx:xx:xx:xx:xx&gt;&#8221;</p>
+<p><strong>dl_type</strong>:[ &#8220;ARP&#8221; | &#8220;IPv4&#8221; ]</p>
+<p><strong>nw_src</strong>:&#8221;&lt;xxx.xxx.xxx.xxx/xx&gt;&#8221;</p>
+<p><strong>nw_dst</strong>:&#8221;&lt;xxx.xxx.xxx.xxx/xx&#8221;&gt;</p>
+<p><strong>nw_proto</strong>&#8221;:[ &#8220;TCP&#8221; | &#8220;UDP&#8221; | &#8220;ICMP&#8221; ]</p>
+<p><strong>tp_src</strong>:[ 0 - 65535 ]</p>
+<p><strong>tp_dst</strong>:[ 0 - 65535 ]</p>
+<p><strong>ip_dscp</strong>:[ 0 - 63 ]</p>
+</div></blockquote>
+<p><strong>actions</strong>:</p>
+<blockquote class="last">
+<div>[ &#8220;mark&#8221;: [ 0 - 63  ] ] |
+[ &#8220;meter&#8221;: [ 미터 ID ] ] |
+[ &#8220;queue&#8221;: [ 큐 ID ] ]</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><strong>참고</strong></td>
+<td><p class="first">등록에 성공하면 QoS ID가 생성되어 응답에 포함됩니다.</p>
+<p class="last">VLAN ID 지정은 옵션입니다.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id23">
+<h3>QoS 규칙 삭제<a class="headerlink" href="#id23" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>DELETE</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/rules/{<strong>switch</strong>}[/{<strong>vlan</strong>}]</p>
+<p>&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+<p class="last">&#8211;<strong>vlan</strong>: [ &#8220;all&#8221; | <em>VLAN ID</em> ]</p>
+</td>
+</tr>
+<tr class="row-odd"><td><strong>데이터</strong></td>
+<td><strong>rule_id</strong>:[ &#8220;all&#8221; | 1 - ... ]</td>
+</tr>
+<tr class="row-even"><td><strong>참고</strong></td>
+<td>VLAN ID 지정은 옵션입니다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id24">
+<h3>미터 테이블 정보 얻기<a class="headerlink" href="#id24" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>GET</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td><p class="first">/qos/meter/{<strong>switch</strong>}</p>
+<p class="last">&#8211;<strong>switch</strong>: [ &#8220;all&#8221; | <em>스위치ID</em> ]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id25">
+<h3>미터 테이블 설정<a class="headerlink" href="#id25" title="제목 주소">¶</a></h3>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>메서드</strong></td>
+<td>POST</td>
+</tr>
+<tr class="row-even"><td><strong>URL</strong></td>
+<td>/qos/meter/{<strong>switch</strong>}</td>
+</tr>
+<tr class="row-odd"><td><strong>데이터</strong></td>
+<td><p class="first"><strong>meter_id</strong>:미터 ID</p>
+<p><strong>bands</strong>:</p>
+<blockquote class="last">
+<div><p><strong>action</strong>:[DROP | DSCP_REMARK]</p>
+<p><strong>flags</strong>:[KBPS | PKTPS | BURST | STATS]</p>
+<p><strong>burst_size</strong>:[버스트 크기]</p>
+<p><strong>rate</strong>:[수신 빈도]</p>
+<p><strong>prec_level</strong>:[재마킹하는 드롭 우선 순위 레벨]</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><strong>참고</strong></td>
+<td>bands에 지정 및 적용하는 매개 변수는 action과 flags에 따라 달라집니다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">목차</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">QoS</a><ul>
+<li><a class="reference internal" href="#id1">QoS에 대해</a></li>
+<li><a class="reference internal" href="#id2">플로우 기반 QoS의 동작 예</a><ul>
+<li><a class="reference internal" href="#id3">환경 구축</a></li>
+<li><a class="reference internal" href="#queue">Queue 설정</a></li>
+<li><a class="reference internal" href="#id4">QoS 설정</a></li>
+<li><a class="reference internal" href="#id5">설정 내용 확인</a></li>
+<li><a class="reference internal" href="#id6">대역폭 측정</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#diffserv-qos">DiffServ의 QoS의 동작 예제</a><ul>
+<li><a class="reference internal" href="#id7">환경 구축</a></li>
+<li><a class="reference internal" href="#id8">Queue 설정</a></li>
+<li><a class="reference internal" href="#id9">라우터 설정</a></li>
+<li><a class="reference internal" href="#id10">QoS 설정</a></li>
+<li><a class="reference internal" href="#id11">설정 내용 확인</a></li>
+<li><a class="reference internal" href="#id12">대역폭 측정</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#meter-table-qos">Meter Table을 사용한 QoS의 동작 예</a><ul>
+<li><a class="reference internal" href="#id13">환경 구축</a></li>
+<li><a class="reference internal" href="#id14">QoS 설정</a></li>
+<li><a class="reference internal" href="#id15">설정 내용 확인</a></li>
+<li><a class="reference internal" href="#id16">대역폭 측정</a><ul>
+<li><a class="reference internal" href="#best-effort-af11">Best-effort 및 AF11 트래픽 초과량 발생</a></li>
+<li><a class="reference internal" href="#af11-best-effort-af11">AF11 초과 트래픽과 Best-effort와 AF11 계약 대역 내 트래픽</a></li>
+<li><a class="reference internal" href="#af11-af11">AF11 초과 트래픽과 AF11 초과 트래픽</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rest-api">REST API 목록</a><ul>
+<li><a class="reference internal" href="#id17">큐 상태 얻기</a></li>
+<li><a class="reference internal" href="#id18">큐 설정 정보 얻기</a></li>
+<li><a class="reference internal" href="#id19">큐 설정</a></li>
+<li><a class="reference internal" href="#id20">큐 삭제</a></li>
+<li><a class="reference internal" href="#id21">전체 QoS 규칙 얻기</a></li>
+<li><a class="reference internal" href="#id22">QoS 규칙 추가</a></li>
+<li><a class="reference internal" href="#id23">QoS 규칙 삭제</a></li>
+<li><a class="reference internal" href="#id24">미터 테이블 정보 얻기</a></li>
+<li><a class="reference internal" href="#id25">미터 테이블 설정</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>이전 항목</h4>
+  <p class="topless"><a href="rest_router.html"
+                        title="이전 장">라우터</a></p>
+  <h4>다음 항목</h4>
+  <p class="topless"><a href="switch_test_tool.html"
+                        title="다음 장">OpenFlow 스위치 테스트 도구</a></p>
+  <div role="note" aria-label="source link">
+    <h3>현재 문서</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/rest_qos.txt"
+            rel="nofollow">소스 코드를 보려면</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>빠른 검색</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="바로 가기" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>탐색</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="전체 색인"
+             >색인</a></li>
+        <li class="right" >
+          <a href="switch_test_tool.html" title="OpenFlow 스위치 테스트 도구"
+             >다음</a> |</li>
+        <li class="right" >
+          <a href="rest_router.html" title="라우터"
+             >이전</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ryubook 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014, RYU project team.
+    </div>
+  </body>
+</html>
