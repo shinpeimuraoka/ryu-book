@@ -1,9 +1,6 @@
 language: python
 python:
 - '2.7'
-branches:
-  only:
-  - master
 install:
 - sudo apt-get update -qq > /dev/null
 - sudo apt-get -y install inkscape texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
@@ -17,4 +14,4 @@ sudo: required
 dist: trusty
 env:
   global:
-    secure: pwbgoovFu1WkBLWhJtKB4ug/CUQBY40Z5VEvuA4GYjDgiZ4Ia2Kp8gF5HF45XnRBTBdYPHFpgZJ7gvBVNJ5nLsCipdEPKu3DQ9D3jDcB20lroa04CLbp90Wl9syHeVTSzzkXgVdK1+ASFGIvN+xpoJHGWCslwYs2vNhJ9wCZsAM=
+    secure: DbhUfqH6WNEzXmDPSUuLhX2DhI5k7ui3kl8dlMDc6MCMG89sGhY3Tjb9sLQGDDHwvYwGS9dXrCswOcFTi2kDzWf0dzVqAb53bAjUvmm6QQCWX7uTrfyNHfZBMVGL1jwUaUtWiHxLxYpPZwL58+2HBA5+8kYENTbzEd1d0XGTIVBwnFhqH7fNSE3Q2A+kwP1ILk50N56lyIBOrk/ZHfEiOfHsKvP8SF49kYSXf/hhvQe5FIuOUQGwoPlpLyah41Z4o76DVIra7BpXlmSYINikd1pqYqsHlIoMutuV8f0EBA9WNNL9uYUOBUSmsp7bX80XEHg6k6QQ7dstqRYPKwjcG4Y8tNn9+itYo+JvvpgwFe6ajNylT+YV1XmLkPZQ0uVzDQ/Db7ifoTX0JI22mA25wRZCGV1XzqoFzCNMVeTBoH6AtOMmI1FQ0cbUY8qV1Hq6O4fJLR5xJiRMCOkc7xyVAV2ZASxkoDzfnwMAi6Vu2iCiHJC6Sty/hSEEnrrCq3HmnbzmQDeHcoWJA+iWC+rHS3ZwU6p2e5nIVtrcjI4eVQcsox7FvezjvndkjGFCCV+HTNeCgKQZbGAZ6jC7pjvlv4fKNqMcEbtNguIAsE3tdMI4eI7UX5G9m0S4m5KLziCNrcH62K6Vfb2OcHdmkcvCsK4zSf6WNDT3VYVvwVZnDSA=
